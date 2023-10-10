@@ -86,9 +86,38 @@ dat <- data.frame(Goby=Goby, Year=Year, Year_int = Year_int, SAV=SAV, SB=SB, SB_
 
 #View(dat)
 nrow(dat) #n = 349
+
+#save a file with all cases including missing cases
+dat.missing <- tibble(Goby=dat$Goby, 
+              Year=dat$Year, 
+              Year_int=dat$Year_int, 
+              SAV=dat$SAV, 
+              SB=dat$SB,
+              SB_count=dat$SB_count,
+              SC=dat$SC, 
+              SC_count=dat$SC_count, 
+              Rain=dat$Rain, 
+              Temp=dat$Temp, 
+              DO=dat$DO, 
+              Breach=dat$Breach, 
+              Breach_count=dat$Breach_count, 
+              Wind=dat$Wind, 
+              Zone=as.factor(dat$Zone), 
+              Substrate=as.factor(dat$Substrate), 
+              Area=dat$Area)
+dat.missing
+
+#remove variables with NAs except Temp, DO, and SAV ok
+dat.missing <- dat.missing %>%
+  filter_at(vars(Year, SAV, SB_count, Goby, SC_count, SB, SC, Substrate, Wind, Zone, Area), 
+            all_vars(!is.na(.)))
+
 ##remove cases with NAs
 dat <- na.omit(dat) #removes 50 cases !  new n = 299, most missingness due to DO
 nrow(dat)
+
+
+
 
 dat.list <- as.list(dat)  # for stan
 
@@ -119,9 +148,9 @@ summary(dat$Area)
 sd(dat$Area)
 
 #test lmer
-m1.lmer <- glmer(Goby ~ #Year + 
+m1.lmer <- glmer(Goby ~ Year + 
                    Rain + I(SC_count/Area) + SAV + I(SB_count/Area) + DO + Temp + 
-                Breach_count + 
+                Breach_count + Wind + 
                 Substrate +(1|Zone), data = dat, family = negative.binomial(0.6), offset = Area)
 summary(m1.lmer)
 
@@ -794,14 +823,14 @@ Goby.m2.year.DAG.SC.SB_counts.Breach.pois <-  ulam(
 beepr::beep(0)
 
 
-precis(Goby.m2.year.DAG.SC.SB_counts.Breach.pois, depth = 1)
+precis(Goby.m2.year.DAG.SC.SB_counts.Breach.pois)
 plot(Goby.m2.year.DAG.SC.SB_counts.Breach.pois, 
      pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_Breach_count", "beta_Temp",
               "beta_DO", "beta_SB_count", "beta_SC_count", "beta_SAV", "beta_Rain"),
      xlab = "Beta Coefficient")
 
 #plot(Goby.m1, depth = 2)
-summary(Goby.m2.year.DAG.SC.SB_counts.Breach.pois, digits = 3)
+summary(Goby.m2.year.DAG.SC.SB_counts.Breach.pois)
 #traceplot(Goby.m2.no.year.DAG.SC.SB_counts.Breach.pois, ask = FALSE)
 stancode(Goby.m2.year.DAG.SC.SB_counts.Breach.pois)
 
@@ -818,6 +847,140 @@ ggplot(dat, aes(Year_int+1995, y = (Goby/Area), color = as.factor(Zone))) +
 
 
 
+####----------
+#### try with imputed data
+### need priors for data and the n = 349 data list 
 
+### add year for trend.
+Goby.m2.year.DAG.SC.SB_counts.Breach.pois.missing <-  ulam(
+  alist(
+    #Goby model
+    Goby ~ dgampois( mu, exp(phi)), 
+    log(mu) <- 
+      a_Goby[Zone] + #random effect 
+      #a_Goby[Substrate] + #random effect 
+      beta_Year*Year +
+      #beta_Rain*Rain + 
+      beta_SC_count*SC_count + #updated
+      beta_SAV*SAV + 
+      beta_SB_count*SB_count + #competition
+      beta_DO*DO +
+      #beta_Temp*Temp +
+      #beta_Breach*Breach + 
+      beta_Substrate*Substrate +
+      #beta_Wind*Wind +  
+      #beta_Zone*Zone + 
+      Area, #offset already logged
+    
+    #Zone RE model
+    a_Goby[Zone] ~ normal(mu_Zone, tau_Zone),
+    mu_Zone ~ normal(0, 5),
+    tau_Zone ~ exponential(1),
+    
+    #Substrate RE model
+    # a_Goby[Substrate] ~ normal(mu_Substrate, tau_Substrate),
+    # mu_Substrate ~ normal(0, 5),
+    # tau_Substrate ~ exponential(1),
+    
+    #DO model
+    DO ~ normal( DO_nu , tau ),
+    DO_nu <- 
+      a_DO + 
+      beta_Temp*Temp +
+      beta_Breach_count*Breach_count + 
+      beta_Wind*Wind +
+      beta_SAV*SAV,
+    
+    #Temp model
+    Temp ~ normal( Temp_nu , tau ),
+    Temp_nu <- 
+      a_Temp + 
+      beta_Breach_count*Breach_count + 
+      beta_Wind*Wind,
+    
+    #SB model as neg.bin
+    SB_count ~ dgampois( SB_mu, exp(SB_phi)), 
+    log(SB_mu) <- 
+      a_SB + 
+      beta_DO*DO + 
+      beta_SAV*SAV + 
+      Area,  # offset
+    
+    #SC model as neg.bin
+    SC_count ~ dgampois( SC_mu, exp(SC_phi)), 
+    log(SC_mu) <- 
+      a_SC + 
+      beta_DO*DO + 
+      beta_SAV*SAV + 
+      Area,  # logged offset
+    
+    #Breach model poisson
+    Breach_count ~ poisson(Breach_nu),
+    log(Breach_nu) <-
+      a_Breach +
+      beta_Rain*Rain +
+      beta_Wind*Wind,
+    
+    #SAV model
+    SAV ~ normal(SAV_nu, tau),
+    SAV_nu <- 
+      a_SAV + 
+      beta_Rain*Rain +
+      beta_Temp*Temp,
+    
+    #missing data priors
+    c(Temp, DO) ~ normal (0,1),
+    
+    #fixed effects priors
+    c(a_Goby, a_Breach, a_DO, a_SB, a_SC, a_SAV, a_Temp,
+      beta_Year, 
+      beta_Rain,
+      beta_SC_count,
+      beta_SAV, 
+      beta_SB_count,
+      beta_DO,
+      beta_Temp, 
+      #beta_Breach,
+      beta_Breach_count,
+      beta_Wind,
+      #beta_Zone,
+      beta_Substrate  
+    ) ~ normal( 0 , 0.5 ),
+    tau ~ exponential(1),
+    phi ~ dnorm( 1, 10 ), #from dgampois help to keep from going negative
+    c(SC_phi, SB_phi) ~ dnorm(1, 10)  # use dexp(100) if not neg.bin
+  ), 
+  data=dat.missing , chains=4 , cores=4 , iter=1000 , cmdstan=TRUE
+)
+
+beepr::beep(0)
+
+
+precis(Goby.m2.year.DAG.SC.SB_counts.Breach.pois.missing, depth = 2)
+plot(Goby.m2.year.DAG.SC.SB_counts.Breach.pois.missing, 
+     pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_Breach_count", "beta_Temp",
+              "beta_DO", "beta_SB_count", "beta_SC_count", "beta_SAV", "beta_Rain"),
+     xlab = "Beta Coefficient")
+
+#plot(Goby.m1, depth = 2)
+summary(Goby.m2.year.DAG.SC.SB_counts.Breach.pois.missing)
+#traceplot(Goby.m2.no.year.DAG.SC.SB_counts.Breach.pois, ask = FALSE)
+stancode(Goby.m2.year.DAG.SC.SB_counts.Breach.pois.missing)
+
+save(Goby.m2.year.DAG.SC.SB_counts.Breach.pois.missing, 
+     file = "Output/Goby.m2.year.DAG.SC.SB_counts.Breach.pois.missing.RData")
+
+
+par(mfrow = c(1,2))
+
+plot(Goby.m2.year.DAG.SC.SB_counts.Breach.pois, 
+     pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_Breach_count", "beta_Temp",
+              "beta_DO", "beta_SB_count", "beta_SC_count", "beta_SAV", "beta_Rain"),
+     xlab = "Beta Coefficient")
+
+plot(Goby.m2.year.DAG.SC.SB_counts.Breach.pois.missing, 
+     pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_Breach_count", "beta_Temp",
+              "beta_DO", "beta_SB_count", "beta_SC_count", "beta_SAV", "beta_Rain"),
+     xlab = "Beta Coefficient")
 
 
