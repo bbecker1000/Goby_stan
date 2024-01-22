@@ -1,0 +1,33 @@
+DF Notes 2024-01-26
+
+1. east zone get most detritus and subsequent low DO
+so look at different slopes by zone for wind
+
+2. consider adding the tub_algae
+    check completeness of data
+    can increase DO, but also reduces DO with dieoff.
+    
+3. BreachDays and GAMM ### BB MADE QUADRATIC
+    A. DF says yes
+    Reach Lafferty Goby papers that show dispersal part of flushing.
+    if zero breach days, then detritus and nutrients pooling
+    if many breach days, gobies can be lost to velocity and flush out of system
+    last summer was first time with gobies at Muir Beach and was related to wettest year.  came from Rodeo?
+    
+    B. Also smooth rain  
+    possibly smooth wind...pushes detritus to edge, BUT ALSO wind increases DO.
+    
+    C. Get UCB langmuir cells and DO levels.  DF send paper to BB.
+    
+4. Google earth color photos?  Summer before we sample?
+      greenness of lagoon as phytoplankton proxy.
+      Maybe a future project??
+      
+5. Breed year round so no lag effects from previous year environmental variables.
+      quick population level response time
+      
+6. paper on gobies and other estuarine fishes  found SB and Goby linkages...  DF send along to BB
+    
+    
+    
+

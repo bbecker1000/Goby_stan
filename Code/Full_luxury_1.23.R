@@ -29,13 +29,20 @@ breach_days_sum <- breach_days %>%
 
 #find missing years
 #2010, 2014 2020 2021  = 0 breaches
-
 ZeroYears <- tibble(WaterYear = c(2010, 2014, 2020, 2021), BreachDays = c(0,0,0,0))
 
 breach_days_sum2 <- rbind(breach_days_sum, ZeroYears)
 breach_days_sum3 <- breach_days_sum2 %>% arrange(WaterYear)
 breach_days_sum <- breach_days_sum3
 
+#key for join
+breach_days_sum$Year <- breach_days_sum$WaterYear
+
+#Join Breach Days to goby master 
+# WY is previous 12 months ...WY1995 = 1994-10-01 to 1995-09-30
+# so match WY to goby sampling year...
+goby_masterB <- goby_master %>% left_join(breach_days_sum, by = "Year")
+goby_master <- goby_masterB
 
 #goby_master$Since_Breach[is.na(goby_master$Since_Breach)] <- 0
 goby_master$Since_Breach <- ifelse(goby_master$Since_Breach == 0.5, 1, 
@@ -68,6 +75,7 @@ Temp   <- scale(dat.temp$temp_mean)
 DO     <- scale(dat.temp$min_DO)
 Breach <- scale(dat.temp$Since_Breach)  
 Breach_count <- dat.temp$Since_Breach  
+BreachDays <- scale(dat.temp$BreachDays)
 #Breach <- as.factor(dat.temp$Since_Breach)  # need to fix this, but categorical is wonky
 Wind   <- scale(dat.temp$u_mean)
 
@@ -99,7 +107,8 @@ Area <- log(dat.temp$Area)
 
 dat <- data.frame(Goby=Goby, Year=Year, Year_int = Year_int, SAV=SAV, SB=SB, SB_count=SB_count, SC=SC, 
                   SC_count=SC_count, Rain=Rain, Temp=Temp, 
-            DO=DO, Breach=Breach,  Breach_count=Breach_count, Wind=Wind, 
+            DO=DO, Breach=Breach,  Breach_count=Breach_count, 
+            BreachDays=BreachDays, Wind=Wind, 
             Zone=Zone, Substrate=Substrate, Area=Area)
 
 
@@ -121,6 +130,7 @@ dat.missing <- tibble(Goby=dat$Goby,
               DO=dat$DO, 
               Breach=dat$Breach, 
               Breach_count=dat$Breach_count, 
+              BreachDays=dat$BreachDays,
               Wind=dat$Wind, 
               Zone=as.factor(dat$Zone), 
               Substrate=as.factor(dat$Substrate), 
@@ -159,6 +169,7 @@ dat <- tibble(Goby=dat$Goby,
             DO=dat$DO, 
             Breach=dat$Breach, 
             Breach_count=dat$Breach_count, 
+            BreachDays = dat$BreachDays,
             Wind=dat$Wind, 
             Zone=as.factor(dat$Zone), 
             Substrate=as.factor(dat$Substrate), 
@@ -168,7 +179,7 @@ summary(dat$Area)
 sd(dat$Area)
 
 
-ggplot(dat, aes(x = Breach_count, y = DO, color = Zone)) +
+ggplot(dat, aes(x = BreachDays, y = DO, color = Zone)) +
   geom_point()
 
 
@@ -176,13 +187,15 @@ ggplot(dat, aes(x = Breach_count, y = DO, color = Zone)) +
 #test lmer
 m1.lmer <- glmer(Goby ~ Year + 
                    Rain + I(SC_count/Area) + SAV + I(SB_count/Area) + DO + Temp + 
-                Breach_count + Wind + 
+                BreachDays +
+                  #Breach_count + 
+                  Wind + 
                 Substrate +(1|Zone), data = dat, family = negative.binomial(0.6), offset = Area)
 summary(m1.lmer)
 
 library(rstanarm)
 m1.stan_glm <- stan_glmer(Goby ~ Year 
-                          Rain + SC_count + SAV + SB + DO + Temp + Breach + 
+                          Rain + SC_count + SAV + SB + DO + Temp + BreachDays + 
                    Substrate + (1|Zone), data = dat, family = neg_binomial_2(),
                    chains = 4, cores = 4, iter = 1000)
 beepr::beep(0)
@@ -203,7 +216,7 @@ Goby.m1.no.network <-  ulam(
       beta_SB*SB + 
       beta_DO*DO +
       beta_Temp*Temp +
-      beta_Breach*Breach + 
+      beta_BreachDays*BreachDays + 
       beta_Substrate*Substrate +
       #beta_Wind*Wind +  
       #beta_Zone*Zone + 
@@ -215,7 +228,7 @@ Goby.m1.no.network <-  ulam(
     tau_Zone ~ exponential(1),
     
     #fixed effects priors
-    c(a_Goby, a_Breach, a_DO, a_SB, a_SC, a_SAV, a_Temp,
+    c(a_Goby, a_BreachDays, a_DO, a_SB, a_SC, a_SAV, a_Temp,
       beta_Year, 
       beta_Rain,
       beta_SC,
@@ -223,7 +236,7 @@ Goby.m1.no.network <-  ulam(
       beta_SB, 
       beta_DO,
       beta_Temp, 
-      beta_Breach,
+      beta_BreachDays,
       beta_Wind,
       #beta_Zone,
       beta_Substrate  
@@ -238,7 +251,7 @@ beepr::beep(0)
 
 precis(Goby.m1.no.network, depth = 2)
 plot(Goby.m1.no.network,
-     pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_Breach", "beta_Temp",
+     pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_BreachDays", "beta_Temp",
                                 "beta_DO", "beta_SB", "beta_SC", "beta_SAV", "beta_Rain"),
      xlab = "Beta Coefficient",
      main = "no network model")
@@ -751,9 +764,11 @@ quantile( with(post, beta_Wind, beta_DO), probs = c(0.1, 0.5, 0.9)) ## positive
 
 
 
-
+## updated 2024-01-19 with BreachDays
 #### add year for trend.
-Goby.m2.year.DAG.SC.SB_counts.Breach.pois <-  ulam(
+t0 <- Sys.time()
+
+Goby.m2.year.DAG.SC.SB_counts.BreachDays <-  ulam(
   alist(
     #Goby model
     Goby ~ dgampois( mu, exp(phi)), 
@@ -788,7 +803,7 @@ Goby.m2.year.DAG.SC.SB_counts.Breach.pois <-  ulam(
     DO_nu <- 
       a_DO + 
       beta_Temp*Temp +
-      beta_Breach_count*Breach_count + 
+      beta_BreachDays*BreachDays + 
       beta_Wind*Wind +
       beta_SAV*SAV,
     
@@ -796,7 +811,7 @@ Goby.m2.year.DAG.SC.SB_counts.Breach.pois <-  ulam(
     Temp ~ normal( Temp_nu , tau ),
     Temp_nu <- 
       a_Temp + 
-      beta_Breach_count*Breach_count + 
+      beta_BreachDays*BreachDays + 
       beta_Wind*Wind,
     
     #SB model as neg.bin
@@ -815,10 +830,10 @@ Goby.m2.year.DAG.SC.SB_counts.Breach.pois <-  ulam(
       beta_SAV*SAV + 
       Area,  # logged offset
     
-    #Breach model poisson
-    Breach_count ~ poisson(Breach_nu),
-    log(Breach_nu) <-
-      a_Breach +
+    #BreachDays as normal
+    BreachDays ~ normal(Breach_nu, tau),
+    Breach_nu <-
+      a_BreachDays +
       beta_Rain*Rain +
       beta_Wind*Wind,
     
@@ -831,7 +846,7 @@ Goby.m2.year.DAG.SC.SB_counts.Breach.pois <-  ulam(
     
     
     #fixed effects priors
-    c(a_Goby, a_Breach, a_DO, a_SB, a_SC, a_SAV, a_Temp,
+    c(a_Goby, a_BreachDays, a_DO, a_SB, a_SC, a_SAV, a_Temp,
       beta_Year, 
       beta_Rain,
       beta_SC_count,
@@ -840,7 +855,7 @@ Goby.m2.year.DAG.SC.SB_counts.Breach.pois <-  ulam(
       beta_DO,
       beta_Temp, 
       #beta_Breach,
-      beta_Breach_count,
+      beta_BreachDays,
       beta_Wind,
       #beta_Zone,
       beta_Substrate  
@@ -849,17 +864,20 @@ Goby.m2.year.DAG.SC.SB_counts.Breach.pois <-  ulam(
     phi ~ dnorm( 1, 10 ), #from dgampois help to keep from going negative
     c(SC_phi, SB_phi) ~ dnorm(1, 10)  # use dexp(100) if not neg.bin
   ), 
-  data=dat , chains=4 , cores=4 , iter=1000 , cmdstan=TRUE
+  data=dat , chains=4 , cores=4 , iter=2000 , cmdstan=TRUE
 )
 
 beepr::beep(0)
+t1 <- Sys.time()
+runtime <- t1-t0
+runtime
 
-
-precis(Goby.m2.year.DAG.SC.SB_counts.Breach.pois)
-plot(Goby.m2.year.DAG.SC.SB_counts.Breach.pois, 
-     pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_Breach_count", "beta_Temp",
+precis(Goby.m2.year.DAG.SC.SB_counts.BreachDays)
+plot(Goby.m2.year.DAG.SC.SB_counts.BreachDays, 
+     pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_BreachDays", "beta_Temp",
               "beta_DO", "beta_SB_count", "beta_SC_count", "beta_SAV", "beta_Rain"),
-     xlab = "Beta Coefficient")
+     xlab = "Beta Coefficient", 
+     main = "network model")
 
 #plot(Goby.m1, depth = 2)
 summary(Goby.m2.year.DAG.SC.SB_counts.Breach.pois)
@@ -867,8 +885,8 @@ summary(Goby.m2.year.DAG.SC.SB_counts.Breach.pois)
 stancode(Goby.m2.year.DAG.SC.SB_counts.Breach.pois)
 
 
-save(Goby.m2.year.DAG.SC.SB_counts.Breach.pois, file = "Output/Goby.m2.year.DAG.SC.SB_counts.Breach.pois.RData")
-load(file = "Output/Goby.m2.year.DAG.SC.SB_counts.Breach.pois.RData")
+save(Goby.m2.year.DAG.SC.SB_counts.BreachDays, file = "Output/Goby.m2.year.DAG.SC.SB_counts.BreachDays.RData")
+#load(file = "Output/Goby.m2.year.DAG.SC.SB_counts.BreachDays.RData")
 
 
 ggplot(dat, aes(Year_int+1995, y = (Goby/Area), color = as.factor(Zone))) + 
@@ -881,14 +899,14 @@ ggplot(dat, aes(Year_int+1995, y = (Goby/Area), color = as.factor(Zone))) +
 
 ## corrected effects of covariates on Goby
 
-post <- extract.samples(Goby.m2.year.DAG.SC.SB_counts.Breach.pois)
+post <- extract.samples(Goby.m2.year.DAG.SC.SB_counts.BreachDays)
 
 #Effect of Rain --> Breach --> DO --> Goby
-quantile( with(post, beta_Rain*beta_Breach_count*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
+quantile( with(post, beta_Rain*beta_BreachDays*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
 #Effect of Breach --> DO --> Goby
-quantile( with(post, beta_Breach_count*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
+quantile( with(post, beta_BreachDays*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
 #Effect of Wind --> Breach --> DO --> Goby
-quantile( with(post, beta_Wind*beta_Breach_count*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
+quantile( with(post, beta_Wind*beta_BreachDays*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
 #Effect of Wind --> DO --> Goby
 quantile( with(post, beta_Wind*beta_DO), probs = c(0.1, 0.5, 0.9)) ## negative   
 #Effect of Wind --> Temp --> DO --> Goby
