@@ -53,6 +53,8 @@ DAG_GOBY <- dagitty("dag{
   O2 -> SAV -> Sculpin ;
   Substrate -> Sculpin -> GOBY;
   Sculpin -> Stickleback;
+  Wind -> Zone;
+  O2 -> Food_U -> GOBY
   
   
   Year [exposure] ;
@@ -66,6 +68,7 @@ DAG_GOBY <- dagitty("dag{
   Breach [exposure] ;
   Rain [exposure] ;
   Wind [exposure] ;
+  Food_U [exposure] ;
 }")
 
 ## add in zone?
@@ -82,13 +85,15 @@ coordinates(DAG_GOBY) <- list(x=c(Year=1,O2=3,
                                   Rain=1,Microsporidia=1, 
                                   Substrate=3, SAV=5, 
                                   Breach=3, Wind=5, 
-                                  Zone= 5, GOBY=1),
+                                  Zone= 5, GOBY=1,
+                                  Food_U=2),
                               y=c(Year=3,O2=-3,
                                   Stickleback=-1,Sculpin=1,
                                   Rain=-5,Microsporidia=-3, 
                                   Substrate=3, SAV=0, 
                                   Breach=-5, Wind=-3, 
-                                  Zone=-5, GOBY=0))
+                                  Zone=-5, GOBY=0,
+                                  Food_U=-2.5))
 plot(DAG_GOBY)
 
 
