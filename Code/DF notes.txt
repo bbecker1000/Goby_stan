@@ -37,5 +37,13 @@ so look at different slopes by zone for wind     DONE WITH INTERACTION TERM 2024
 10. TO DO Try forecasting 10 years under hi and low rainfall, temp, and breach scenarios.  Pepperwood climate futures report...can take their estimates...
 
 11. TO DO - add 2023 data from DF  BB send DF the goby master data file for DF to populate with 2023
+
+12. 2023-02-27:  Prepping new datasheet: goby_master_2023.csv on NPS laptop.  has all 2023 event, WQ and fish data incorporated but waiting for updated breach data for 2023 from Darren.  Data resides on NPS laptop in Goby/Data.
+
+13. 2024-02-47: asked DF why no fish in 2023 at site W251.
+
+14. rainfall data from ggweather.com/sf/monthly.html
+
+
     
 

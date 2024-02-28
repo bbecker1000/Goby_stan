@@ -855,7 +855,7 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
     phi ~ dnorm( 1, 10 ), #from dgampois help to keep from going negative
     c(SC_phi, SB_phi) ~ dnorm(1, 10)  # use dexp(100) if not neg.bin
   ), 
-  data=dat , chains=4 , cores=parallel::detectCores() , iter=20000 , 
+  data=dat , chains=3 , cores=parallel::detectCores() , iter=20000 , 
   cmdstan=FALSE # to get stanfit object
 )
 
@@ -883,6 +883,10 @@ plot(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS,
               "beta_ZW"),
      xlab = "Beta Coefficient", 
      main = "network model-Breach Direct")
+
+
+save(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS, file = "Output/Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS.RData")
+#load(file = "Output/Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RData")
 
 
 stancode(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS)
