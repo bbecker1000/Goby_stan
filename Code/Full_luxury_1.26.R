@@ -200,7 +200,11 @@ dat <- tibble(Goby=dat$Goby,
 dat
 summary(dat$Area)
 sd(dat$Area)
+<<<<<<< HEAD
 dat$Zone
+=======
+
+>>>>>>> 779ca296118b7a29be827890febcdab31a706538
 
 ggplot(dat, aes(x = BreachDays_Count, y = Goby/Area, color = Zone)) +
   geom_point() +
@@ -753,9 +757,15 @@ t0 <- Sys.time()
 Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
   alist(
     #Goby model
+<<<<<<< HEAD
     Goby ~ dgampois( mu, phi ), 
     log(mu) <- 
       a_Goby[Zone] + #random intercept 
+=======
+    Goby ~ dgampois( mu, phi ), #, 
+    log(mu) <- 
+      a_Goby[Zone] + #random slope and random intercept 
+>>>>>>> 779ca296118b7a29be827890febcdab31a706538
       #a_Goby[Substrate] + #random effect 
       beta_Year*Year +
       #beta_Rain*Rain + 
@@ -858,7 +868,11 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
     #phi ~ dnorm( 1, 3 ), #from dgampois help to keep from going negative
     c(SC_phi, SB_phi) ~ dexp(1)  # use dexp(100) if not neg.bin
   ), 
+<<<<<<< HEAD
   data=dat , chains=3 , cores=parallel::detectCores() , iter=10000 , 
+=======
+  data=dat , chains=3 , cores=parallel::detectCores() , iter=5000 , 
+>>>>>>> 779ca296118b7a29be827890febcdab31a706538
   cmdstan=TRUE # FALSE to get stanfit object
 )
 
@@ -936,7 +950,10 @@ Rain_Temp_SAV_SB<-as_tibble(quantile( with(post, beta_Rain*beta_Temp*beta_SAV*be
 
 Year<-as_tibble(quantile( with(post, beta_Year), probs = PROBS)) ## ns 
 Substrate_SC<-as_tibble(quantile( with(post, beta_Substrate*beta_SC_count), probs = PROBS)) ## negative
+<<<<<<< HEAD
 Substrate<-as_tibble(quantile( with(post, beta_Substrate), probs = PROBS))
+=======
+>>>>>>> 779ca296118b7a29be827890febcdab31a706538
 Rain_DO_SAV_SB<-as_tibble(quantile( with(post, beta_Rain*beta_DO*beta_SAV*beta_SB_count), probs = PROBS))
 
 Breach<-as_tibble(quantile( with(post, beta_BreachDays), probs = PROBS)) #positive
@@ -957,7 +974,11 @@ Breach_DO_SC<-as_tibble(quantile( with(post, beta_BreachDays*beta_DO*beta_SC_cou
 
 #names for tibble
 names<- c("Rain_Breach_DO", "Rain_Breach_2", "Breach_DO", "Wind_DO", "Wind_Temp_DO", "Wind_DO_SAV", "Wind_DO_SC",
+<<<<<<< HEAD
           "DO_SB", "Year", "Substrate_SC", "Substrate", "Rain_DO_SAV_SB", "Breach", "Zone", "Zone_Wind_int", 
+=======
+          "DO_SB", "Year", "Substrate_SC", "Rain_DO_SAV_SB", "Breach", "Zone", "Zone_Wind_int", 
+>>>>>>> 779ca296118b7a29be827890febcdab31a706538
           "Micro", "SAV_SB", "SAV_SC", "SC", "SB","Breach_DO_SC", "Rain_Breach_Temp",
           "Breach_Temp",
           "Wind_Temp",
@@ -967,7 +988,11 @@ names<- c("Rain_Breach_DO", "Rain_Breach_2", "Breach_DO", "Wind_DO", "Wind_Temp_
           "Rain_Temp_SAV_SB")
 #add probabilities
 plot.posteriors<-rbind(Rain_Breach_DO, Rain_Breach_2, Breach_DO, Wind_DO, Wind_Temp_DO, Wind_DO_SAV, Wind_DO_SC,
+<<<<<<< HEAD
         DO_SB, Year, Substrate_SC, Substrate, Rain_DO_SAV_SB, Breach, Zone, Zone_Wind_int,
+=======
+        DO_SB, Year, Substrate_SC, Rain_DO_SAV_SB, Breach, Zone, Zone_Wind_int,
+>>>>>>> 779ca296118b7a29be827890febcdab31a706538
         Micro, SAV_SB, SAV_SC, SC, SB, Breach_DO_SC, Rain_Breach_Temp,
         Breach_Temp,
         Wind_Temp,
@@ -994,8 +1019,11 @@ ggplot(plot.posteriors.wide, aes(x = names, y = median, color = effect)) +
   geom_point() +
   geom_pointrange(aes(ymin = lower, ymax = upper)) +
   geom_hline(yintercept = 0, lty = 2) +
+<<<<<<< HEAD
   xlab("Covariate") +
   ylab("Causal Effect on Goby Density") +
+=======
+>>>>>>> 779ca296118b7a29be827890febcdab31a706538
   coord_flip() 
 
 
