@@ -6,6 +6,12 @@ library(tidyverse)
 counts_2023 <- read_excel("C:/projects/Goby/data/Goby2023data_Rodeo.xlsx", 
                           sheet = "Fishdat")
 
+unique(counts_2023$SPECIES)
+
+
+counts_2023$SPECIES <- ifelse(counts_2023$SPECIES == "PSC", "SC", counts_2023$SPECIES)
+
+
 d1 <- counts_2023 %>% 
   group_by(Station, SPECIES) %>%
   summarize(Count = sum(Numbers))

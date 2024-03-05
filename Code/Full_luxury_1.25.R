@@ -15,9 +15,9 @@ library(rstan)
 library(rstanarm)
 library(sjPlot)
 library(marginaleffects)
-goby_master <- read_csv("C:/projects/Goby/data/goby_master.csv")
+goby_master <- read_csv("C:/projects/Goby_stan/Data/goby_master_2023.csv")
 
-breach_days <- read_excel("C:/projects/Goby/data/RodeoLagoon-Status_WY1995-present.xlsx", 
+breach_days <- read_excel("C:/projects/Goby_stan/Data/RodeoLagoon-Status_WY1995_2023.xlsx", 
                                  col_types = c("date", "numeric", "numeric", "text", "text"))
 #keep first three columns
 breach_days <- breach_days[,c(1:3)]
@@ -127,7 +127,7 @@ dat <- data.frame(Goby=Goby, Year=Year, Year_int = Year_int, SAV=SAV, SB=SB, SB_
 
 
 #View(dat)
-nrow(dat) #n = 349
+nrow(dat) #n = 364
 
 #save a file with all cases including missing cases
 dat.missing <- tibble(Goby=dat$Goby, 
@@ -245,6 +245,7 @@ m1.gamm <- gamm(Goby ~ Year +
                   niterPQL=50)
 summary(m1.gamm$gam)
 plot(m1.gamm$gam)
+
 plot_model(m1.gamm)
 
 
@@ -745,13 +746,14 @@ stancode(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct)
 ## updated 2024-01-23 with Micro
 ## updated 2024-01-30 with Zone*Wind interaction
 ## updated 2024-02-09 with breachdays and temp squared
+## 2024-03-04 added 2023 data from darren
 #### add year for trend.
 t0 <- Sys.time()
 
 Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
   alist(
     #Goby model
-    Goby ~ dgampois( mu, exp(phi)), 
+    Goby ~ dgampois( mu, exp(phi)), #phi)), #, 
     log(mu) <- 
       a_Goby[Zone] + #random slope and random intercept 
       #a_Goby[Substrate] + #random effect 
@@ -776,7 +778,7 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
     
     #Zone RE model
     a_Goby[Zone] ~ normal(mu_Zone, tau_Zone), #the "1" adds varying slope.
-    mu_Zone ~ normal(0, 5),
+    mu_Zone ~ normal(0, 1),  # was 0,5
     tau_Zone ~ exponential(1),
     
     #Substrate RE model
@@ -850,13 +852,14 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
       beta_Zone,
       beta_ZW,
       beta_Substrate
-    ) ~ normal( 0 , 1 ),
+    ) ~ normal( 0 , 0.75 ),
     tau ~ exponential(1),
-    phi ~ dnorm( 1, 10 ), #from dgampois help to keep from going negative
-    c(SC_phi, SB_phi) ~ dnorm(1, 10)  # use dexp(100) if not neg.bin
+    #phi ~ dexp(1),
+    phi ~ dnorm( 1, 3 ), #from dgampois help to keep from going negative
+    c(SC_phi, SB_phi) ~ dnorm(1, 5)  # use dexp(100) if not neg.bin
   ), 
-  data=dat , chains=3 , cores=parallel::detectCores() , iter=20000 , 
-  cmdstan=FALSE # to get stanfit object
+  data=dat , chains=3 , cores=parallel::detectCores() , iter=10000 , 
+  cmdstan=TRUE # FALSE to get stanfit object
 )
 
 beepr::beep(0)
