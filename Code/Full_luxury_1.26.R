@@ -90,26 +90,28 @@ Wind   <- scale(dat.temp$u_mean)
 
 
 
-Zone   <- as.factor(dat.temp$Zone)
-Substrate   <- as.factor(dat.temp$Dom_substrate)
+Zone   <- (dat.temp$Zone)
+Substrate   <- (dat.temp$Dom_substrate)
 #Random Effects
 unique(dat.temp$Zone)
 # zone to integer, keep as three zones
-Zone   <- as.integer(ifelse(dat.temp$Zone == "E", 0,
-                  ifelse(dat.temp$Zone == "NW", 1,
-                         ifelse(dat.temp$Zone == "W", 2, dat.temp$Zone))))
+# stan requires groups not be named "0"
+Zone   <- as.integer(ifelse(dat.temp$Zone == "E", 1,
+                  ifelse(dat.temp$Zone == "NW", 2,
+                         ifelse(dat.temp$Zone == "W", 3, dat.temp$Zone))))
 unique(dat.temp$Dom_substrate)
 
 plot(dat.temp$Sum_TW, Zone)
 
 #pool substrates
-Substrate <- as.integer(ifelse(dat.temp$Dom_substrate == "corophium_tubes", "1",
-                ifelse(dat.temp$Dom_substrate == "mud", "0",
-                       ifelse(dat.temp$Dom_substrate == "muck", "0",
-                       ifelse(dat.temp$Dom_substrate == "gravel", "1",
-                       ifelse(dat.temp$Dom_substrate == "sand", "1",
-                       ifelse(dat.temp$Dom_substrate == "cobble", "1",
-                       ifelse(dat.temp$Dom_substrate == "riprap", "1",
+# stan requires groups not be named "0"
+Substrate <- as.integer(ifelse(dat.temp$Dom_substrate == "corophium_tubes", "2",
+                ifelse(dat.temp$Dom_substrate == "mud", "1",
+                       ifelse(dat.temp$Dom_substrate == "muck", "1",
+                       ifelse(dat.temp$Dom_substrate == "gravel", "2",
+                       ifelse(dat.temp$Dom_substrate == "sand", "2",
+                       ifelse(dat.temp$Dom_substrate == "cobble", "2",
+                       ifelse(dat.temp$Dom_substrate == "riprap", "2",
                             dat.temp$Dom_substrate))))))))
 
 #Offset
@@ -125,7 +127,7 @@ dat <- data.frame(Goby=Goby, Year=Year, Year_int = Year_int, SAV=SAV, SB=SB, SB_
             Zone=Zone, Substrate=Substrate, Area=Area)
 
 
-
+str(dat)
 #View(dat)
 nrow(dat) #n = 364
 
@@ -162,7 +164,7 @@ dat.missing <- dat.missing %>%
 
 ##remove cases with NAs
 dat <- na.omit(dat) #removes 50 cases !  new n = 299, most missingness due to DO
-nrow(dat)
+nrow(dat) #314
 
 
 
@@ -194,17 +196,14 @@ dat <- tibble(Goby=dat$Goby,
             BreachDays_Count_2 = dat$BreachDays_Count_2,
             Wind=dat$Wind,
             Micro=dat$Micro,
-            Zone=as.factor(dat$Zone), 
-            Substrate=as.factor(dat$Substrate), 
+            Zone=as.integer(dat$Zone), 
+            Substrate=as.integer(dat$Substrate), 
             Area=dat$Area)
 dat
 summary(dat$Area)
 sd(dat$Area)
-<<<<<<< HEAD
 dat$Zone
-=======
 
->>>>>>> 779ca296118b7a29be827890febcdab31a706538
 
 ggplot(dat, aes(x = BreachDays_Count, y = Goby/Area, color = Zone)) +
   geom_point() +
@@ -584,7 +583,7 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays <-  ulam(
     phi ~ dnorm( 1, 10 ), #from dgampois help to keep from going negative
     c(SC_phi, SB_phi) ~ dnorm(1, 10)  # use dexp(100) if not neg.bin
   ), 
-  data=dat , chains=4 , cores=4 , iter=2000 , cmdstan=TRUE
+  data=dat , chains=4 , cores=4 , iter=1000 , cmdstan=TRUE
 )
 
 beepr::beep(0)
@@ -757,54 +756,37 @@ t0 <- Sys.time()
 Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
   alist(
     #Goby model
-<<<<<<< HEAD
-    Goby ~ dgampois( mu, phi ), 
-    log(mu) <- 
-      a_Goby[Zone] + #random intercept 
-=======
     Goby ~ dgampois( mu, phi ), #, 
     log(mu) <- 
       a_Goby[Zone] + #random slope and random intercept 
->>>>>>> 779ca296118b7a29be827890febcdab31a706538
-      #a_Goby[Substrate] + #random effect 
       beta_Year*Year +
-      #beta_Rain*Rain + 
       beta_SC_count*SC_count + #updated
       beta_SAV*SAV + 
       beta_SB_count*SB_count + #competition
       beta_DO*DO +
       beta_Micro*Micro + #added 2024-01-23
-      #beta_Temp*Temp +
       beta_BreachDays*BreachDays + 
       beta_BreachDays_2*BreachDays_2 +  # include? as direct effect on goby?
-      beta_Substrate*Substrate +    # remove if RE
+      beta_Substrate*Substrate +
       beta_Wind*Wind +
       beta_Temp*Temp +    # added 2024-02-09
       beta_Temp_2*Temp_2 +  # added 2024-02-09
-      beta_Zone*Zone + 
-      beta_ZW*Wind*Zone + # interaction between wind and Zone
-      #slope of wind piling up algae
+      #beta_ZW*Wind*Zone + # interaction between wind and Zone
+                           # slope of wind piling up algae
       Area, #offset already logged
     
     #Zone RE model
-    a_Goby[Zone] ~ normal(mu_Zone, tau_Zone), #the "1" adds varying slope.
-    mu_Zone ~ normal(0, 0.5),  # was 0,5
-    tau_Zone ~ exponential(1),
-    
-    #Substrate RE model
-    # a_Goby[Substrate] ~ normal(mu_Substrate, tau_Substrate),
-    #  mu_Substrate ~ normal(0, 5),
-    #  tau_Substrate ~ exponential(1),
+    a_Goby[Zone] ~ dnorm(mu_Zone, tau_Zone), #the "1" adds varying slope.
+    mu_Zone ~ dnorm(0, 0.5),  # was 0,5
+    tau_Zone ~ dexp(1),
     
     #DO model
     DO ~ normal( DO_nu , tau ),
     DO_nu <- 
       a_DO + 
       beta_Temp*Temp +
-      # beta_BreachDays*BreachDays + # does breach effect DO?  
       beta_Wind*Wind,
 
-    
     #Temp model
     Temp ~ normal( Temp_nu , tau ),
     Temp_nu <- 
@@ -819,7 +801,7 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
       beta_DO*DO + 
       beta_SAV*SAV + 
       beta_SC_count*SC_count +  #added per DF 2024-01-25
-      Area,  # offset
+      Area,  # logged offset
     
     #SC model as neg.bin
     SC_count ~ dgampois( SC_mu, SC_phi), 
@@ -843,37 +825,33 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
       beta_DO*DO +
       beta_Temp*Temp,
     
-    
     #fixed effects priors
     c(a_Goby, a_BreachDays, a_DO, a_SB, a_SC, a_SAV, a_Temp,
-      beta_Year, 
-      beta_Rain,
-      beta_SC_count,
-      beta_SAV, 
       beta_SB_count,
-      beta_DO,
+      beta_Year,
       beta_Temp, 
-      beta_Temp_2, 
+      beta_Temp_2,
       beta_Micro,
-      #beta_Breach,
-      beta_BreachDays,
-      beta_BreachDays_2,
-      beta_Wind,
-      beta_Zone,
-      beta_ZW,
-      beta_Substrate
-    ) ~ normal( 0 , 0.75 ),
+      beta_Wind
+      # beta_ZW
+      ) ~ 
+      normal( 0 , 0.75 ),
+
+      beta_Rain         ~ normal( 0.25 , 0.25 ),
+      beta_SC_count     ~ normal(-0.10 , 0.25 ),
+      beta_SAV          ~ normal( 0.25 , 0.25 ),
+      beta_DO           ~ normal( 0.25 , 0.25 ),
+      beta_BreachDays   ~ normal( 0.25 , 0.25 ),
+      beta_BreachDays_2 ~ normal( 0.25 , 0.25 ),
+      beta_Substrate    ~ normal( 0.25 , 0.25 ),
+    
     tau ~ exponential(1),
     phi ~ dexp(1), 
     #phi ~ dnorm( 1, 3 ), #from dgampois help to keep from going negative
     c(SC_phi, SB_phi) ~ dexp(1)  # use dexp(100) if not neg.bin
   ), 
-<<<<<<< HEAD
-  data=dat , chains=3 , cores=parallel::detectCores() , iter=10000 , 
-=======
-  data=dat , chains=3 , cores=parallel::detectCores() , iter=5000 , 
->>>>>>> 779ca296118b7a29be827890febcdab31a706538
-  cmdstan=TRUE # FALSE to get stanfit object
+  data=dat , chains=3 , cores=parallel::detectCores() , iter=3000 ,  
+  cmdstan=FALSE # FALSE to get stanfit object
 )
 
 beepr::beep(0)
@@ -895,9 +873,10 @@ plot(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS,
               "beta_Rain",
               "beta_Temp",
               "beta_Temp_2",
-              "beta_Wind",
-              "beta_Zone",
-              "beta_ZW"),
+              "beta_Wind"#,
+            #  "beta_Zone,"#
+            #  "beta_ZW"
+            ),
      xlab = "Beta Coefficient", 
      main = "network model-Breach Direct")
 
@@ -950,15 +929,10 @@ Rain_Temp_SAV_SB<-as_tibble(quantile( with(post, beta_Rain*beta_Temp*beta_SAV*be
 
 Year<-as_tibble(quantile( with(post, beta_Year), probs = PROBS)) ## ns 
 Substrate_SC<-as_tibble(quantile( with(post, beta_Substrate*beta_SC_count), probs = PROBS)) ## negative
-<<<<<<< HEAD
 Substrate<-as_tibble(quantile( with(post, beta_Substrate), probs = PROBS))
-=======
->>>>>>> 779ca296118b7a29be827890febcdab31a706538
 Rain_DO_SAV_SB<-as_tibble(quantile( with(post, beta_Rain*beta_DO*beta_SAV*beta_SB_count), probs = PROBS))
 
 Breach<-as_tibble(quantile( with(post, beta_BreachDays), probs = PROBS)) #positive
-Zone<-as_tibble(quantile( with(post, beta_Zone), probs = PROBS))   #positive
-Zone_Wind_int<-as_tibble(quantile( with(post, beta_ZW), probs = PROBS))  #positive
 Rain_Micro<-as_tibble(quantile( with(post, beta_Rain*beta_Micro), probs = PROBS))
 Micro<-as_tibble(quantile( with(post, beta_Micro), probs = PROBS))
 SAV_SB<-as_tibble(quantile( with(post, beta_SAV*beta_SB_count), probs = PROBS))
@@ -974,12 +948,10 @@ Breach_DO_SC<-as_tibble(quantile( with(post, beta_BreachDays*beta_DO*beta_SC_cou
 
 #names for tibble
 names<- c("Rain_Breach_DO", "Rain_Breach_2", "Breach_DO", "Wind_DO", "Wind_Temp_DO", "Wind_DO_SAV", "Wind_DO_SC",
-<<<<<<< HEAD
-          "DO_SB", "Year", "Substrate_SC", "Substrate", "Rain_DO_SAV_SB", "Breach", "Zone", "Zone_Wind_int", 
-=======
-          "DO_SB", "Year", "Substrate_SC", "Rain_DO_SAV_SB", "Breach", "Zone", "Zone_Wind_int", 
->>>>>>> 779ca296118b7a29be827890febcdab31a706538
+          "DO_SB", "Year", "Substrate_SC", "Substrate", "Rain_DO_SAV_SB", "Breach", 
+          "DO_SB", "Year", "Substrate_SC", "Rain_DO_SAV_SB", "Breach", 
           "Micro", "SAV_SB", "SAV_SC", "SC", "SB","Breach_DO_SC", "Rain_Breach_Temp",
+          #"Zone", "Zone_Wind_int", 
           "Breach_Temp",
           "Wind_Temp",
           "Wind_Temp_SAV",
@@ -988,12 +960,10 @@ names<- c("Rain_Breach_DO", "Rain_Breach_2", "Breach_DO", "Wind_DO", "Wind_Temp_
           "Rain_Temp_SAV_SB")
 #add probabilities
 plot.posteriors<-rbind(Rain_Breach_DO, Rain_Breach_2, Breach_DO, Wind_DO, Wind_Temp_DO, Wind_DO_SAV, Wind_DO_SC,
-<<<<<<< HEAD
-        DO_SB, Year, Substrate_SC, Substrate, Rain_DO_SAV_SB, Breach, Zone, Zone_Wind_int,
-=======
-        DO_SB, Year, Substrate_SC, Rain_DO_SAV_SB, Breach, Zone, Zone_Wind_int,
->>>>>>> 779ca296118b7a29be827890febcdab31a706538
+        DO_SB, Year, Substrate_SC, Substrate, Rain_DO_SAV_SB, Breach, 
+        DO_SB, Year, Substrate_SC, Rain_DO_SAV_SB, Breach, 
         Micro, SAV_SB, SAV_SC, SC, SB, Breach_DO_SC, Rain_Breach_Temp,
+        #Zone, Zone_Wind_int,
         Breach_Temp,
         Wind_Temp,
         Wind_Temp_SAV,
@@ -1006,31 +976,38 @@ plot.posteriors$names <- rep(names, each=3)
 plot.posteriors$probability <- rep(c("lower", "median", "upper"), times = length(names))
 
 plot.posteriors.wide <- plot.posteriors %>% 
-                            pivot_wider(names_from = c(probability), values_from = value)
+  group_by(probability) %>%
+  mutate(row = row_number()) %>%
+  tidyr::pivot_wider(names_from = probability, values_from = value) %>%
+  select(-row)
+
 #add codes for positive or negative coefficients
-plot.posteriors.wide$effect <- ifelse(plot.posteriors.wide$lower<0 & plot.posteriors.wide$median <0 & plot.posteriors.wide$upper <0, "negative",
-                                                                  ifelse(plot.posteriors.wide$lower>0 & plot.posteriors.wide$median >0 & plot.posteriors.wide$upper >0, "positive",
+plot.posteriors.wide$effect <- ifelse(
+                                  plot.posteriors.wide$lower<0 & 
+                                    plot.posteriors.wide$median <0 & 
+                                      plot.posteriors.wide$upper <0, 
+                                        "negative", ifelse(plot.posteriors.wide$lower>0 
+                                                           & plot.posteriors.wide$median >0 & 
+                                                             plot.posteriors.wide$upper >0, 
+                                                                "positive",
                                                                   "neutral"))
 
 
-print(plot.posteriors.wide, n = 27)
+print(plot.posteriors.wide, n = 31)
 
 ggplot(plot.posteriors.wide, aes(x = names, y = median, color = effect)) +
   geom_point() +
   geom_pointrange(aes(ymin = lower, ymax = upper)) +
   geom_hline(yintercept = 0, lty = 2) +
-<<<<<<< HEAD
   xlab("Covariate") +
   ylab("Causal Effect on Goby Density") +
-=======
->>>>>>> 779ca296118b7a29be827890febcdab31a706538
   coord_flip() 
 
 
 
-str(rethinking::extract.samples(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct))
+str(rethinking::extract.samples(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS))
 
-Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct %>%
+Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS %>%
   spread_draws(a_Goby[Zone]) %>%
   head(10)
 
@@ -1041,41 +1018,11 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct %>%
 plot(dat$BreachDays, dat$Goby/dat$Area)
 ns <- 100
 P_seq <- seq( from = -1.2, to = 2.3, length.out = ns)
-lambda <- link( Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct, data=data.frame(P=P_seq, cid=1))
+lambda <- link( Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS, data=data.frame(P=P_seq, cid=1))
 lmu <- apply( lambda, 2, mean)
 lci <- apply( lambda, 2, PI)
 lines(P_seq, lmu, lty = 2, lwd = 1.5)
 shade(lci, P_seq, xpd = TRUE)
-
-
-
-#compare plots with and without direct breach effects()
-
-par(mfrow = c(1,1))
-plot(Goby.m2.year.DAG.SC.SB_counts.BreachDays, 
-     pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_BreachDays", "beta_Temp",
-              "beta_DO", "beta_SB_count", "beta_SC_count", "beta_SAV", "beta_Rain"),
-     xlab = "Beta Coefficient", 
-     main = "network model")
-
-plot(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct, 
-     pars = c("beta_Year", "beta_Substrate", "beta_Wind", "beta_BreachDays", "beta_Temp",
-              "beta_DO", "beta_SB_count", "beta_SC_count", "beta_SAV", "beta_Rain"),
-     xlab = "Beta Coefficient", 
-     main = "network model - Breach Direct")
-
-
-
-#plot(Goby.m1, depth = 2)
-summary(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct)
-#traceplot(Goby.m2.no.year.DAG.SC.SB_counts.Breach.pois, ask = FALSE)
-stancode(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct)
-
-
-save(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct, file = "Output/Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RData")
-#load(file = "Output/Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RData")
-
-
 
 
 
@@ -1086,28 +1033,6 @@ ggplot(dat, aes(Year_int+1995, y = (Goby/Area), color = as.factor(Zone))) +
   ylab("density/log(m2)") +
   xlab("Year") +
   theme_classic(base_size=22)
-
-
-## corrected effects of covariates on Goby
-
-post <- extract.samples(Goby.m2.year.DAG.SC.SB_counts.BreachDays)
-
-#Effect of Rain --> Breach --> DO --> Goby
-quantile( with(post, beta_Rain*beta_BreachDays*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
-#Effect of Breach --> DO --> Goby
-quantile( with(post, beta_BreachDays*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
-#Effect of Wind --> Breach --> DO --> Goby
-quantile( with(post, beta_Wind*beta_BreachDays*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
-#Effect of Wind --> DO --> Goby
-quantile( with(post, beta_Wind*beta_DO), probs = c(0.1, 0.5, 0.9)) ## negative   
-#Effect of Wind --> Temp --> DO --> Goby
-quantile( with(post, beta_Wind*beta_Temp*beta_DO), probs = c(0.1, 0.5, 0.9)) ## negative  
-#Effect of Wind --> Temp --> SAV --> Goby
-quantile( with(post, beta_Wind*beta_SAV*beta_DO), probs = c(0.1, 0.5, 0.9)) ## negative  
-#Effect of Wind --> DO --> SB --> Goby
-quantile( with(post, beta_Wind*beta_DO*beta_SB_count), probs = c(0.1, 0.5, 0.9)) ## ns 
-#Effect of DO --> SB --> Goby
-quantile( with(post, beta_DO*beta_SB_count), probs = c(0.1, 0.5, 0.9)) ## ns 
 
 
 
@@ -1128,7 +1053,6 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.missing <-  ulam(
     Goby ~ dgampois( mu, exp(phi)), 
     log(mu) <- 
       a_Goby[Zone] + #random effect 
-      a_Goby[Substrate] + #random effect 
       beta_Year*Year +
       #beta_Rain*Rain + 
       beta_SC_count*SC_count + #updated
@@ -1247,28 +1171,6 @@ save(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.missing,
 ####
 
 
-
-#Causal Effects calcs:
-post <- extract.samples(Goby.m2.year.DAG.SC.SB_counts.Breach.pois.missing)
-
-#Effect of Rain --> Breach --> DO --> Goby
-quantile( with(post, beta_Rain*beta_Breach_count*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
-#Effect of Breach --> DO --> Goby
-quantile( with(post, beta_Breach_count*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
-#Effect of Wind --> Breach --> DO --> Goby
-quantile( with(post, beta_Wind*beta_Breach_count*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
-#Effect of Wind --> DO --> Goby
-quantile( with(post, beta_Wind*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns   
-#Effect of Wind --> Temp --> DO --> Goby
-quantile( with(post, beta_Wind*beta_Temp*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns  
-#Effect of Wind --> Temp --> SAV --> Goby
-quantile( with(post, beta_Wind*beta_SAV*beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns  
-#Effect of Wind --> DO --> SB --> Goby
-quantile( with(post, beta_Wind*beta_DO*beta_SB_count), probs = c(0.1, 0.5, 0.9)) ## ns 
-#Effect of DO --> SB --> Goby
-quantile( with(post, beta_DO*beta_SB_count), probs = c(0.1, 0.5, 0.9)) ## ns 
-
-quantile( with(post, beta_DO), probs = c(0.1, 0.5, 0.9)) ## ns
 
 
 

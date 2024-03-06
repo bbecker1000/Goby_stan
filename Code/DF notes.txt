@@ -33,17 +33,25 @@ so look at different slopes by zone for wind     DONE WITH INTERACTION TERM 2024
         DO --> Unobserved food  --> three fish species
         
 9. TO DO Add a non-linear term for temp since goby has sweet spot based on physiology.  no lethal limit.
+  DONE
 
 10. TO DO Try forecasting 10 years under hi and low rainfall, temp, and breach scenarios.  Pepperwood climate futures report...can take their estimates...
 
 11. TO DO - add 2023 data from DF  BB send DF the goby master data file for DF to populate with 2023
+  DONE
 
 12. 2023-02-27:  Prepping new datasheet: goby_master_2023.csv on NPS laptop.  has all 2023 event, WQ and fish data incorporated but waiting for updated breach data for 2023 from Darren.  Data resides on NPS laptop in Goby/Data.
 
-13. 2024-02-47: asked DF why no fish in 2023 at site W251.
+13. 2024-02-47: asked DF why no fish in 2023 at site W251.  
+    ** DF confirmed no fish caught in that net set
 
 14. rainfall data from ggweather.com/sf/monthly.html
 
-
+2024-03-05
+15. TO DO:
+     A. make sure zone RE is a factor - DONE
+     B. look at simulating interventions. - TO DO
+     C. look at other papers to get priors for some covariates - 
+          - DONE, based on DF knowledge from other sites
     
 
