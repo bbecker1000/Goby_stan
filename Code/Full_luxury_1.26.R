@@ -926,6 +926,10 @@ Wind_Temp_SC<-as_tibble(quantile( with(post, beta_Wind*beta_Temp*beta_SC_count),
 Temp_SB<-as_tibble(quantile( with(post, beta_Temp*beta_SB_count), probs = PROBS)) ## ns 
 Rain_Temp_SAV_SB<-as_tibble(quantile( with(post, beta_Rain*beta_Temp*beta_SAV*beta_SB_count), probs = PROBS))
 
+Temp<-as_tibble(quantile( with(post, beta_Temp), probs = PROBS)) ## ns 
+Temp_2<-as_tibble(quantile( with(post, beta_Temp_2), probs = PROBS)) ## ns 
+
+Breach_2<-as_tibble(quantile( with(post, beta_BreachDays_2), probs = PROBS)) ## ns 
 
 Year<-as_tibble(quantile( with(post, beta_Year), probs = PROBS)) ## ns 
 Substrate_SC<-as_tibble(quantile( with(post, beta_Substrate*beta_SC_count), probs = PROBS)) ## negative
@@ -957,7 +961,10 @@ names<- c("Rain_Breach_DO", "Rain_Breach_2", "Breach_DO", "Wind_DO", "Wind_Temp_
           "Wind_Temp_SAV",
           "Wind_Temp_SC",
           "Temp_SB",
-          "Rain_Temp_SAV_SB")
+          "Rain_Temp_SAV_SB",
+          "Temp",
+          "Temp_2",
+          "Breach_2")
 #add probabilities
 plot.posteriors<-rbind(Rain_Breach_DO, Rain_Breach_2, Breach_DO, Wind_DO, Wind_Temp_DO, Wind_DO_SAV, Wind_DO_SC,
         DO_SB, Year, Substrate_SC, Substrate, Rain_DO_SAV_SB, Breach, 
@@ -969,7 +976,10 @@ plot.posteriors<-rbind(Rain_Breach_DO, Rain_Breach_2, Breach_DO, Wind_DO, Wind_T
         Wind_Temp_SAV,
         Wind_Temp_SC,
         Temp_SB,
-        Rain_Temp_SAV_SB)
+        Rain_Temp_SAV_SB,
+        Temp,
+        Temp_2,
+        Breach_2)
 #add names
 plot.posteriors$names <- rep(names, each=3)
 #add probabilities names
@@ -1027,7 +1037,7 @@ shade(lci, P_seq, xpd = TRUE)
 
 
 
-ggplot(dat, aes(Year_int+1995, y = (Goby/Area), color = as.factor(Zone))) + 
+ggplot(dat, aes(Year, y = (Goby/Area), color = as.factor(Zone))) + 
   geom_point() +
   geom_smooth() +
   ylab("density/log(m2)") +

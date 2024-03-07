@@ -54,4 +54,13 @@ so look at different slopes by zone for wind     DONE WITH INTERACTION TERM 2024
      C. look at other papers to get priors for some covariates - 
           - DONE, based on DF knowledge from other sites
     
+2024-03-07
+
+16. Make sure all larvae are not in the analysis...check Thuy-Tien Code.
+17. Finalize plots and tables and draft methods and results
+18. 2021 data week later in flooded terrestrial habitat after rains...treat separately?  sampled in different habitat?  Drop?  
+19. Plot covariates over time for patterns.
+20. Look up Younger lagoon paper.
+21. Publication outlets?
+
 
