@@ -1,5 +1,12 @@
 # Models
+<<<<<<< HEAD
 source("1_DataPrep.R")
+=======
+
+
+
+
+>>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
 
 #test lmer
 m1.lmer <- glmer(Goby ~ Year + 
@@ -806,6 +813,30 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS %>%
 
 
 
+<<<<<<< HEAD
+=======
+#effects plot
+#k <- PSIS(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct, pointwise = TRUE)$k
+plot(dat$BreachDays, dat$Goby/dat$Area)
+ns <- 100
+P_seq <- seq( from = -1.2, to = 2.3, length.out = ns)
+lambda <- link( Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS, data=data.frame(P=P_seq, cid=1))
+lmu <- apply( lambda, 2, mean)
+lci <- apply( lambda, 2, PI)
+lines(P_seq, lmu, lty = 2, lwd = 1.5)
+shade(lci, P_seq, xpd = TRUE)
+
+
+
+
+ggplot(dat, aes(Year, y = (Goby/Area), color = as.factor(Zone))) + 
+  geom_point() +
+  geom_smooth() +
+  ylab("density/log(m2)") +
+  xlab("Year") +
+  theme_classic(base_size=22)
+
+>>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
 
 
 

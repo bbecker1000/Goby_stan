@@ -135,7 +135,10 @@ d.all.post$BreachDays_2 <- rep(dat$BreachDays_2, 4500)
 d.all.post$Wind <- rep(dat$Wind, 4500)
 d.all.post$Zone <- rep(dat$Zone, 4500)
 d.all.post$Substrate <- rep(dat$Substrate, 4500)
+<<<<<<< HEAD
 d.all.post$Micro <- rep(dat$Micro, 4500)
+=======
+>>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
 d.all.post$Area <- rep(dat$Area, 4500) #already logged
 
 
@@ -145,6 +148,7 @@ d.all.post$SAMPLE <- rep(1:4500, each = 314)
 #Breach effects plot
 d.all.post %>% filter(SAMPLE <= 50) %>%
 ggplot(aes(x = Breach, mu, group = SAMPLE)) +
+<<<<<<< HEAD
   geom_point(alpha = 0.1, color = "blue") + 
   stat_smooth (method = "loess", geom="line", color = "black", alpha=0.1, size=1) +
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
@@ -183,6 +187,36 @@ d.all.post %>% filter(SAMPLE <= 50) %>%
   geom_smooth(linewidth = 0.001, method = "lm", se = FALSE, color = "black", alpha =0.1) +
   ylim(0,1000) + 
   facet_wrap(.~Zone)
+=======
+  geom_point(alpha = 0.1) + 
+  geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
+  ylim(0,1500)
+
+#Year effects plot
+d.all.post %>% filter(SAMPLE <= 50) %>%
+  ggplot(aes(x = Year_int+1994, mu/Area, group = SAMPLE, color = as_factor(Zone))) +
+  geom_point(alpha = 0.2) + 
+  stat_smooth (geom="line", color = "black", alpha=0.1, size=1) +
+  #geom_smooth(aes(alpha = 0.1), method = "loess", se = FALSE) +
+  ylim(0,1000)
+
+#BreachDays_2 effects plot 
+# check if squared the raw value before centering in model !!
+d.all.post %>% filter(SAMPLE <= 50) %>%
+  ggplot(aes(x = BreachDays_2, mu/Area, group = SAMPLE, color = as_factor(Zone))) +
+  geom_point(alpha = 0.2) + 
+  stat_smooth (geom="line", color = "gray", alpha=0.3, size=1) +
+  #geom_smooth(aes(alpha = 0.1), method = "loess", se = FALSE) +
+  ylim(0,1000)
+
+#Wind effects plot 
+d.all.post %>% filter(SAMPLE <= 50) %>%
+  ggplot(aes(x = Wind, mu/Area, group = SAMPLE, color = as_factor(Zone))) +
+  geom_point(alpha = 0.2) + 
+  stat_smooth (geom="line", color = "black", alpha=0.1, size=1) +
+  #geom_smooth(aes(alpha = 0.1), method = "loess", se = FALSE) +
+  ylim(0,1000)
+>>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
 
 #Rain effects plot 
 # check if squared the raw value before centering in model !!
@@ -200,6 +234,7 @@ d.all.post %>% filter(SAMPLE <= 50) %>%
   geom_jitter(alpha = 0.1, size = 0.1) 
 
 
+<<<<<<< HEAD
 #SAV Effects plot
 d.all.post %>% filter(SAMPLE <= 50) %>%
   ggplot(aes(x = SAV, mu/Area, group = SAMPLE, color = as_factor(Zone))) +
@@ -228,6 +263,8 @@ d.all.post %>% filter(SAMPLE <= 50) %>%
 
 
 
+=======
+>>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
 
 
 
