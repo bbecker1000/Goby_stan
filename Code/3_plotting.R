@@ -23,22 +23,7 @@ theme_set(theme_tidybayes() + panel_border())
 #rename model for plotting
 fit <- Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS #m1 is stanfit
 
-
-
-
-par(mfrow=c(1,3))
-for ( s in -2:2 ) {
-  idx <- which( dat$Zone==1 )
-  plot( dat$BreachDays[dat$Zone==1] , dat$Goby[dat$Zone==1], xlim = c(-2,2), ylim = c(0,2500) ,
-    xlab="BreachDays", ylab="Goby", pch = 16, col = rangi2 )
-    mu <- link( fit, data = data.frame(Zone=1 , BreachDays=-2:2 ) ) 
-  for (i in 1:10) lines( -2:2, mu[i,], col = col.alpha("black, 0.3") )
-}
-
 names(as_tibble(link(fit)))
-
-
-names(post)
 
 post <- as.data.frame(link(fit))
 #just get post-warmup values
@@ -127,28 +112,25 @@ d.all.post <- bind_cols(d.mu, d.DO, d.Temp, d.SB, d.SC, d.Breach, d.SAV)
 # Zone
 # Substrate
 # Area
-d.all.post$Year <- rep(dat$Year, 4500)
-d.all.post$Year_int <- rep(dat$Year_int, 4500)
-d.all.post$Rain <- rep(dat$Rain, 4500)
-d.all.post$Temp_2 <- rep(dat$Temp_2, 4500)
-d.all.post$BreachDays_2 <- rep(dat$BreachDays_2, 4500)
-d.all.post$Wind <- rep(dat$Wind, 4500)
-d.all.post$Zone <- rep(dat$Zone, 4500)
-d.all.post$Substrate <- rep(dat$Substrate, 4500)
-<<<<<<< HEAD
-d.all.post$Micro <- rep(dat$Micro, 4500)
-=======
->>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
-d.all.post$Area <- rep(dat$Area, 4500) #already logged
+
+d.all.post$Year <- rep(dat$Year, nrow(d.all.post)/nrow(dat))
+d.all.post$Year_int <- rep(dat$Year_int, 2500)
+d.all.post$Rain <- rep(dat$Rain, 2500)
+d.all.post$Temp_2 <- rep(dat$Temp_2, 2500)
+d.all.post$BreachDays_2 <- rep(dat$BreachDays_2, 2500)
+d.all.post$Wind <- rep(dat$Wind, 2500)
+d.all.post$Zone <- rep(dat$Zone, 2500)
+d.all.post$Substrate <- rep(dat$Substrate, 2500)
+d.all.post$Micro <- rep(dat$Micro, 2500)
+d.all.post$Area <- rep(dat$Area, 2500) #already logged
 
 
 #index for which data sample (cases = 314)
-d.all.post$SAMPLE <- rep(1:4500, each = 314)
+d.all.post$SAMPLE <- rep(1:2500, each = 314)
 
 #Breach effects plot
 d.all.post %>% filter(SAMPLE <= 50) %>%
 ggplot(aes(x = Breach, mu, group = SAMPLE)) +
-<<<<<<< HEAD
   geom_point(alpha = 0.1, color = "blue") + 
   stat_smooth (method = "loess", geom="line", color = "black", alpha=0.1, size=1) +
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
@@ -160,7 +142,7 @@ ggplot(aes(x = Breach, mu, group = SAMPLE)) +
 #Year effects plot
 d.all.post %>% filter(SAMPLE <= 50) %>%
   ggplot(aes(x = Year_int+1994, mu/Area, group = SAMPLE)) + #, color = as_factor(Zone)
-  geom_point(alpha = 0.1, color = "blue") + 
+  geom_jitter(alpha = 0.1, color = "blue") + 
   stat_smooth (method = "lm", geom="line", color = "black", alpha=0.1, size=1) +
   #geom_smooth(linewidth = 0.001, method = "lm", se = FALSE, color = "black") +
   ylim(0,1000) + 
@@ -172,6 +154,7 @@ d.all.post %>% filter(SAMPLE <= 50) %>%
 # squared the raw value before centering in model 
 d.all.post %>% filter(SAMPLE <= 50) %>%
   ggplot(aes(x = BreachDays_2, mu/Area, group = SAMPLE)) +#, color = as_factor(Zone))) +
+  geom_jitter(alpha = 0.1, color = "blue") + 
   stat_smooth (method = "loess", geom="line", color = "black", alpha=0.1, size=1) +
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,1500) + 
@@ -182,44 +165,13 @@ d.all.post %>% filter(SAMPLE <= 50) %>%
 #Wind effects plot 
 d.all.post %>% filter(SAMPLE <= 50) %>%
   ggplot(aes(x = Wind, mu/Area, group = SAMPLE)) + #, color = as_factor(Zone)
-  geom_point(alpha = 0.2, color = "blue") + 
+  geom_jitter(alpha = 0.2, color = "blue") + 
   #stat_smooth (geom="line", color = "black", alpha=0.1, size=1) +
   geom_smooth(linewidth = 0.001, method = "lm", se = FALSE, color = "black", alpha =0.1) +
   ylim(0,1000) + 
-  facet_wrap(.~Zone)
-=======
-  geom_point(alpha = 0.1) + 
-  geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
-  ylim(0,1500)
-
-#Year effects plot
-d.all.post %>% filter(SAMPLE <= 50) %>%
-  ggplot(aes(x = Year_int+1994, mu/Area, group = SAMPLE, color = as_factor(Zone))) +
-  geom_point(alpha = 0.2) + 
-  stat_smooth (geom="line", color = "black", alpha=0.1, size=1) +
-  #geom_smooth(aes(alpha = 0.1), method = "loess", se = FALSE) +
-  ylim(0,1000)
-
-#BreachDays_2 effects plot 
-# check if squared the raw value before centering in model !!
-d.all.post %>% filter(SAMPLE <= 50) %>%
-  ggplot(aes(x = BreachDays_2, mu/Area, group = SAMPLE, color = as_factor(Zone))) +
-  geom_point(alpha = 0.2) + 
-  stat_smooth (geom="line", color = "gray", alpha=0.3, size=1) +
-  #geom_smooth(aes(alpha = 0.1), method = "loess", se = FALSE) +
-  ylim(0,1000)
-
-#Wind effects plot 
-d.all.post %>% filter(SAMPLE <= 50) %>%
-  ggplot(aes(x = Wind, mu/Area, group = SAMPLE, color = as_factor(Zone))) +
-  geom_point(alpha = 0.2) + 
-  stat_smooth (geom="line", color = "black", alpha=0.1, size=1) +
-  #geom_smooth(aes(alpha = 0.1), method = "loess", se = FALSE) +
-  ylim(0,1000)
->>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
+  facet_wrap(.~Zone) 
 
 #Rain effects plot 
-# check if squared the raw value before centering in model !!
 d.all.post %>% filter(SAMPLE <= 50) %>%
   ggplot(aes(x = Rain, mu/Area, group = SAMPLE, color = as_factor(Zone))) +
   geom_point(alpha = 0.2) + 
@@ -230,18 +182,18 @@ d.all.post %>% filter(SAMPLE <= 50) %>%
 #substrate Effects plot
 d.all.post %>% filter(SAMPLE <= 50) %>%
   ggplot(aes(x = as.factor(Substrate), mu/Area)) +
-  #geom_boxplot() + 
+  geom_boxplot(alpha = 0.5) + 
   geom_jitter(alpha = 0.1, size = 0.1) 
 
 
-<<<<<<< HEAD
 #SAV Effects plot
 d.all.post %>% filter(SAMPLE <= 50) %>%
   ggplot(aes(x = SAV, mu/Area, group = SAMPLE, color = as_factor(Zone))) +
   geom_point(alpha = 0.2) + 
   stat_smooth (geom="line", color = "black", alpha=0.1, size=1) +
   #geom_smooth(aes(alpha = 0.1), method = "loess", se = FALSE) +
-  ylim(0,1000)
+  ylim(0,1000) + 
+  facet_wrap(.~Zone)
 
 #SC Effects plot
 #effect not intuitive
@@ -263,8 +215,7 @@ d.all.post %>% filter(SAMPLE <= 50) %>%
 
 
 
-=======
->>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
+
 
 
 

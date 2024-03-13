@@ -63,4 +63,9 @@ so look at different slopes by zone for wind     DONE WITH INTERACTION TERM 2024
 20. Look up Younger lagoon paper.
 21. Publication outlets?
 
+2024-03-13
+
+22. Use geom function to plot the slopes of the table plot.posteriors.wide
+
+
 

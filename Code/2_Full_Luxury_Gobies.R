@@ -1,12 +1,9 @@
 # Models
-<<<<<<< HEAD
 source("1_DataPrep.R")
-=======
 
 
 
 
->>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
 
 #test lmer
 m1.lmer <- glmer(Goby ~ Year + 
@@ -672,7 +669,7 @@ plot(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS,
 
 
 save(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS, file = "Output/Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS.RData")
-#load(file = "Output/Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RData")
+#load(file = "Output/Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS.RData")
 
 
 stancode(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS)
@@ -801,7 +798,8 @@ ggplot(plot.posteriors.wide, aes(x = names, y = median, color = effect)) +
   geom_hline(yintercept = 0, lty = 2) +
   xlab("Covariate") +
   ylab("Causal Effect on Goby Density") +
-  coord_flip() 
+  coord_flip() +
+  theme_gray(base_size = 16)
 
 
 
@@ -813,8 +811,7 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS %>%
 
 
 
-<<<<<<< HEAD
-=======
+
 #effects plot
 #k <- PSIS(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct, pointwise = TRUE)$k
 plot(dat$BreachDays, dat$Goby/dat$Area)
@@ -836,7 +833,6 @@ ggplot(dat, aes(Year, y = (Goby/Area), color = as.factor(Zone))) +
   xlab("Year") +
   theme_classic(base_size=22)
 
->>>>>>> ba22611eee0b68b354fb9539a9d3c3abfee2286a
 
 
 
