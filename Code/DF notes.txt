@@ -1,13 +1,12 @@
 DF Notes 2024-01-26
 
 1. east zone get most detritus and subsequent low DO
-so look at different slopes by zone for wind
-
+so look at different slopes by zone for wind     DONE WITH INTERACTION TERM 2024-01-30
 2. consider adding the tub_algae
     check completeness of data
     can increase DO, but also reduces DO with dieoff.
     
-3. BreachDays and GAMM ### BB MADE QUADRATIC
+3. BreachDays and GAMM ### BB MADE QUADRATIC NOT MUCH EFFECT ON EACH COEFFICIENT  LEFT QUAD IN FINAL MODEL
     A. DF says yes
     Reach Lafferty Goby papers that show dispersal part of flushing.
     if zero breach days, then detritus and nutrients pooling
@@ -19,15 +18,54 @@ so look at different slopes by zone for wind
     
     C. Get UCB langmuir cells and DO levels.  DF send paper to BB.
     
-4. Google earth color photos?  Summer before we sample?
+4. Google earth color photos?  Summer before we sample?   NO ACTION NEEDED
       greenness of lagoon as phytoplankton proxy.
       Maybe a future project??
       
 5. Breed year round so no lag effects from previous year environmental variables.
-      quick population level response time
+      quick population level response time   NO ACTION NEEDED
       
 6. paper on gobies and other estuarine fishes  found SB and Goby linkages...  DF send along to BB
     
+7. TO THINK ABOUT: Zone effects on substrate - not include since zone substrate is pretty consistent over time. Don't model, but detail the logic in the methods.
+
+8. TO DO Perhaps add unobserved variable?  Matt young food dynamics model:  in summer when looked at diets there was a lot of overlap (not in spring).  BB look at that paper.  DF - include food resource as an unobserved variable.  
+        DO --> Unobserved food  --> three fish species
+        
+9. TO DO Add a non-linear term for temp since goby has sweet spot based on physiology.  no lethal limit.
+  DONE
+
+10. TO DO Try forecasting 10 years under hi and low rainfall, temp, and breach scenarios.  Pepperwood climate futures report...can take their estimates...
+
+11. TO DO - add 2023 data from DF  BB send DF the goby master data file for DF to populate with 2023
+  DONE
+
+12. 2023-02-27:  Prepping new datasheet: goby_master_2023.csv on NPS laptop.  has all 2023 event, WQ and fish data incorporated but waiting for updated breach data for 2023 from Darren.  Data resides on NPS laptop in Goby/Data.
+
+13. 2024-02-47: asked DF why no fish in 2023 at site W251.  
+    ** DF confirmed no fish caught in that net set
+
+14. rainfall data from ggweather.com/sf/monthly.html
+
+2024-03-05
+15. TO DO:
+     A. make sure zone RE is a factor - DONE
+     B. look at simulating interventions. - TO DO
+     C. look at other papers to get priors for some covariates - 
+          - DONE, based on DF knowledge from other sites
     
-    
+2024-03-07
+
+16. Make sure all larvae are not in the analysis...check Thuy-Tien Code.
+17. Finalize plots and tables and draft methods and results
+18. 2021 data week later in flooded terrestrial habitat after rains...treat separately?  sampled in different habitat?  Drop?  
+19. Plot covariates over time for patterns.
+20. Look up Younger lagoon paper.
+21. Publication outlets?
+
+2024-03-13
+
+22. Use geom function to plot the slopes of the table plot.posteriors.wide
+
+
 
