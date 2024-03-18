@@ -15,9 +15,9 @@ library(rstan)
 library(rstanarm)
 library(sjPlot)
 library(marginaleffects)
-goby_master <- read_csv("C:/projects/Goby/data/goby_master.csv")
+goby_master <- read_csv("Data/goby_master.csv")
 
-breach_days <- read_excel("C:/projects/Goby/data/RodeoLagoon-Status_WY1995-present.xlsx", 
+breach_days <- read_excel("Data/RodeoLagoon-Status_WY1995-present.xlsx", 
                                  col_types = c("date", "numeric", "numeric", "text", "text"))
 #keep first three columns
 breach_days <- breach_days[,c(1:3)]
@@ -288,7 +288,7 @@ Goby.m1.no.network <-  ulam(
     phi ~ normal( 0 , 10 ),
     c(SC_phi, SB_phi) ~ dexp(100) 
   ), 
-  data=dat , chains=4 , cores=4 , iter=500 , cmdstan=TRUE)
+  data=dat , chains=4 , cores=4 , iter=500 , cmdstan=FALSE)
 
 beepr::beep(0)
 
@@ -419,7 +419,7 @@ Goby.m2.DAG.SC.SB_counts.Breach.pois <-  ulam(
     phi ~ dnorm( 1, 10 ), #from dgampois help to keep from going negative
     c(SC_phi, SB_phi) ~ dnorm(1, 10)  # use dexp(100) if not neg.bin
   ), 
-  data=dat , chains=4 , cores=4 , iter=2000 , cmdstan=TRUE
+  data=dat , chains=4 , cores=4 , iter=2000 , cmdstan=FALSE
 )
 
 beepr::beep(0)
