@@ -60,6 +60,14 @@ summary(goby_master$micro_sum)
 dat.temp <- goby_master
 
 
+hist(dat.temp$Year)
+
+#2024-03-19 per DF
+#remove 2021 due to poor sampling conditions (flood)
+
+dat.temp <- dat.temp %>% filter(Year != 2021)
+hist(dat.temp$Year)
+
 
 
 ## Prep Data
@@ -69,6 +77,7 @@ Year   <- scale(dat.temp$Year-1995)
 Year_2   <- scale((dat.temp$Year-1995)^2)
 Year_int <- as.integer(dat.temp$Year-1995)
 SAV    <- scale(dat.temp$SAV)
+SAV_2    <- scale(dat.temp$SAV^2)
 SB     <- scale(dat.temp$Sum_SB)
 SB_count     <- dat.temp$Sum_SB # if using counts
 SC     <- scale(dat.temp$Sum_SC)
@@ -86,10 +95,6 @@ BreachDays_2 <- scale(dat.temp$BreachDays^2)
 BreachDays_Count_2 <- (dat.temp$BreachDays^2)
 #Breach <- as.factor(dat.temp$Since_Breach)  # need to fix this, but categorical is wonky
 Wind   <- scale(dat.temp$u_mean)
-
-
-
-
 
 Zone   <- (dat.temp$Zone)
 Substrate   <- (dat.temp$Dom_substrate)
@@ -119,7 +124,8 @@ Substrate <- as.integer(ifelse(dat.temp$Dom_substrate == "corophium_tubes", "2",
 Area <- log(dat.temp$Area)
 
 
-dat <- data.frame(Goby=Goby, Year=Year, Year_2=Year_2, Year_int = Year_int, SAV=SAV, SB=SB, SB_count=SB_count, SC=SC, 
+dat <- data.frame(Goby=Goby, Year=Year, Year_2=Year_2, Year_int = Year_int, SAV=SAV, SAV_2=SAV_2,
+                  SB=SB, SB_count=SB_count, SC=SC, 
                   SC_count=SC_count, Rain=Rain, Temp=Temp, Temp_2=Temp_2, #added 2024-02-09
                   DO=DO, Breach=Breach,  Breach_count=Breach_count, #added 2024-01-23
                   BreachDays=BreachDays, BreachDays_2=BreachDays_2,
@@ -138,6 +144,7 @@ dat.missing <- tibble(Goby=dat$Goby,
                       Year_2=dat$Year_2, 
                       Year_int=dat$Year_int, 
                       SAV=dat$SAV, 
+                      SAV_2=dat$SAV_2,
                       SB=dat$SB,
                       SB_count=dat$SB_count,
                       SC=dat$SC, 
@@ -183,6 +190,7 @@ dat <- tibble(Goby=dat$Goby,
               Year_2=dat$Year_2, 
               Year_int=dat$Year_int, 
               SAV=dat$SAV, 
+              SAV_2=dat$SAV_2,
               SB=dat$SB,
               SB_count=dat$SB_count,
               SC=dat$SC, 
