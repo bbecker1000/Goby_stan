@@ -186,7 +186,7 @@ d <- d.all.post %>% filter(SAMPLE <= 200)
                color = "blue") + #raw data
     #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
     ylim(0,200) + 
-    ylab("Gobys/m2") +
+    ylab("Goby Density (m2)") +
     xlab("Year") +
     facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs)) 
   
@@ -252,9 +252,9 @@ ggplot(data = d, aes(x = SAV, y = mu/exp(Area))) + #, group = SAMPLE
                alpha=0.2, size=1, 
                color = "red") +
   stat_smooth (data = d, method = "lm", 
-               #formula = y~poly(x,2), 
+               formula = y~poly(x,2), 
                geom="line", aes(group = SAMPLE), 
-               alpha=0.05, size=0.5) +
+               alpha=0.05, size=0.5, color = "red") +
   geom_point(data = dat, aes(x = SAV, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
@@ -264,8 +264,9 @@ ggplot(data = d, aes(x = SAV, y = mu/exp(Area))) + #, group = SAMPLE
 
 
 #SC Effects plot
-ggplot(data = d, aes(x = SC_count/exp(Area), y = mu/exp(Area))) + #, group = SAMPLE
-  #geom_point(alpha = 0.05, color = "blue") + #posterior data
+#needs debugging
+ggplot(data = d, aes(x = SC/exp(Area), y = mu/exp(Area))) + #, group = SAMPLE
+  #geom_point(alpha = 0.05, color = "grey") + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, size=1, 
                color = "blue") +
@@ -276,7 +277,7 @@ ggplot(data = d, aes(x = SC_count/exp(Area), y = mu/exp(Area))) + #, group = SAM
   geom_point(data = dat, aes(x = SC_count/exp(Area), y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,300) + 
-  xlim(0,30) +
+  #xlim(0,30) +
   ylab("Goby Density") +
   xlab("Sculpin Density") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
@@ -284,10 +285,10 @@ ggplot(data = d, aes(x = SC_count/exp(Area), y = mu/exp(Area))) + #, group = SAM
 
 #Micro Effects plot
 ggplot(data = d, aes(x = Micro, y = mu/exp(Area))) + #, group = SAMPLE
-  #geom_point(alpha = 0.05, color = "blue") + #posterior data
+  geom_point(alpha = 0.05, color = "gray") + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, size=1, 
-               color = "blue") +
+               color = "red") +
   # stat_smooth (data = d, method = "lm", 
   #              formula = y~poly(x,2), 
   #              geom="line", aes(group = SAMPLE), 

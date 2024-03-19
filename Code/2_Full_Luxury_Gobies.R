@@ -816,17 +816,22 @@ print(plot.posteriors.wide, n = 31)
 
 COLORS = c("red", "black", "blue")
 
-ggplot(plot.posteriors.wide, aes(x = names, y = median, color = effect)) +
+plot.posteriors.wide %>%
+  mutate(
+    names = fct_reorder(names, -median)
+  ) %>%
+ggplot(aes(x = names, y = median, color = effect)) +
   #geom_point(effect = c("red", "black", "blue"))) +
   geom_pointrange(aes(ymin = lower, ymax = upper)) +
   geom_hline(yintercept = 0, lty = 2) +
-  xlab("Covariate") +
+  xlab("Causal Path") + 
   ylab("Causal Effect on Goby Density") +
   scale_color_manual(breaks = c("negative", "neutral", "positive"),
                      values=c("red", "darkgray", "green3")) + 
   coord_flip() +
   scale_x_discrete(limits=rev) +
   theme_gray(base_size = 16)
+
 
 str(rethinking::extract.samples(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS))
 
