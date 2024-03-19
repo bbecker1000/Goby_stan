@@ -65,7 +65,8 @@ dat.temp <- goby_master
 ## Prep Data
 #IVs
 Goby   <- dat.temp$Sum_TW  # must be non-negative
-Year   <- scale(dat.temp$Year)
+Year   <- scale(dat.temp$Year-1995)
+Year_2   <- scale((dat.temp$Year-1995)^2)
 Year_int <- as.integer(dat.temp$Year-1995)
 SAV    <- scale(dat.temp$SAV)
 SB     <- scale(dat.temp$Sum_SB)
@@ -118,7 +119,7 @@ Substrate <- as.integer(ifelse(dat.temp$Dom_substrate == "corophium_tubes", "2",
 Area <- log(dat.temp$Area)
 
 
-dat <- data.frame(Goby=Goby, Year=Year, Year_int = Year_int, SAV=SAV, SB=SB, SB_count=SB_count, SC=SC, 
+dat <- data.frame(Goby=Goby, Year=Year, Year_2=Year_2, Year_int = Year_int, SAV=SAV, SB=SB, SB_count=SB_count, SC=SC, 
                   SC_count=SC_count, Rain=Rain, Temp=Temp, Temp_2=Temp_2, #added 2024-02-09
                   DO=DO, Breach=Breach,  Breach_count=Breach_count, #added 2024-01-23
                   BreachDays=BreachDays, BreachDays_2=BreachDays_2,
@@ -134,6 +135,7 @@ nrow(dat) #n = 364
 #save a file with all cases including missing cases
 dat.missing <- tibble(Goby=dat$Goby, 
                       Year=dat$Year, 
+                      Year_2=dat$Year_2, 
                       Year_int=dat$Year_int, 
                       SAV=dat$SAV, 
                       SB=dat$SB,
@@ -178,6 +180,7 @@ dat.list <- as.list(dat)  # for stan
 
 dat <- tibble(Goby=dat$Goby, 
               Year=dat$Year, 
+              Year_2=dat$Year_2, 
               Year_int=dat$Year_int, 
               SAV=dat$SAV, 
               SB=dat$SB,
