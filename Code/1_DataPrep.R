@@ -65,7 +65,7 @@ hist(dat.temp$Year)
 #2024-03-19 per DF
 #remove 2021 due to poor sampling conditions (flood)
 
-dat.temp <- dat.temp %>% filter(Year != 2021)
+#dat.temp <- dat.temp %>% filter(Year != 2021)
 hist(dat.temp$Year)
 
 
@@ -216,12 +216,4 @@ sd(dat$Area)
 dat$Zone
 
 
-ggplot(dat, aes(x = BreachDays_Count, y = Goby/Area, color = Zone)) +
-  geom_point() +
-  geom_smooth(method = "loess") +
-  facet_wrap(~Zone)
-
-ggplot(dat, aes(x = Micro, y = Goby/Area)) +
-  geom_point() +
-  geom_smooth(method = "loess")
 
