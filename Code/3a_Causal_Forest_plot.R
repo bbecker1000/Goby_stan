@@ -63,7 +63,7 @@ SAV_2<-as_tibble(quantile( with(post, beta_SAV_2), probs = PROBS))
 SC<-as_tibble(quantile( with(post, beta_SC_count), probs = PROBS))
 SB<-as_tibble(quantile( with(post, beta_SB_count), probs = PROBS))
 Breach_DO_SC<-as_tibble(quantile( with(post, beta_BreachDays*beta_DO*beta_SC_count), probs = PROBS)) ##  NS
-
+Goby_Lag<-as_tibble(quantile( with(post, beta_Goby_lag), probs = PROBS))
 # 2024-02-01
 # ADD RAIN --> BREACH
 
@@ -91,7 +91,8 @@ names<- c("RAIN -> Breach -> DO", "RAIN -> Breach^2", "BREACH -> DO", "WIND -> D
           "RAIN -> Breach",
           "YEAR^2",
           "SAV",
-          "SAV^2")
+          "SAV^2",
+          "Goby_Lag")
 #add probabilities
 plot.posteriors<-rbind(Rain_Breach_DO, Rain_Breach_2, Breach_DO, Wind_DO, Wind_Temp_DO, Wind_DO_SAV, Wind_DO_SC,
                        DO_SB, 
@@ -114,7 +115,8 @@ plot.posteriors<-rbind(Rain_Breach_DO, Rain_Breach_2, Breach_DO, Wind_DO, Wind_T
                        Rain_Breach,
                        Year_2,
                        SAV,
-                       SAV_2)
+                       SAV_2,
+                       Goby_Lag)
 #add names
 plot.posteriors$names <- rep(names, each=3)
 #add probabilities names
@@ -158,8 +160,8 @@ plot.posteriors.wide %>%
   scale_x_discrete(limits=rev) +
   theme_gray(base_size = 16)
 
-ggsave("Output/forest.plot.Year.png", width = 20, height = 30, units = "cm")
-str(rethinking::extract.samples(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS))
+ggsave("Output/forest.plot.Yearlag.png", width = 20, height = 30, units = "cm")
+str(rethinking::extract.samples(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS.lag))
 
 
 

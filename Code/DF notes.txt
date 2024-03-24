@@ -67,5 +67,6 @@ so look at different slopes by zone for wind     DONE WITH INTERACTION TERM 2024
 
 22. Use geom function to plot the slopes of the table plot.posteriors.wide
 
+23. instead of ar() (mcelreath p. 542), use density of TWG in year t-1 as a mechanistic estimate of larval potential.
 
 

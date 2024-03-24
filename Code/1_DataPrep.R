@@ -15,9 +15,9 @@ library(rstan)
 library(rstanarm)
 library(sjPlot)
 library(marginaleffects)
-goby_master <- read_csv("C:/projects/Goby_stan/Data/goby_master_2023.csv")
+goby_master <- read_csv("Data/goby_master_2023.csv")
 
-breach_days <- read_excel("C:/projects/Goby_stan/Data/RodeoLagoon-Status_WY1995_2023.xlsx", 
+breach_days <- read_excel("Data/RodeoLagoon-Status_WY1995_2023.xlsx", 
                           col_types = c("date", "numeric", "numeric", "text", "text"))
 #keep first three columns
 breach_days <- breach_days[,c(1:3)]
@@ -67,8 +67,6 @@ hist(dat.temp$Year)
 
 #dat.temp <- dat.temp %>% filter(Year != 2021)
 hist(dat.temp$Year)
-
-
 
 ## Prep Data
 #IVs
@@ -134,6 +132,42 @@ dat <- data.frame(Goby=Goby, Year=Year, Year_2=Year_2, Year_int = Year_int, SAV=
                   Zone=Zone, Substrate=Substrate, Area=Area)
 
 
+
+## 2024-03-24
+## create lagged t-1 overall TWG/AREA density to account for 
+## mechanistic larval supply
+## in lieu of ar()
+
+dat$GobyDens <- dat$Goby/dat$Area
+hist(dat$GobyDens) 
+hist(dat$Year_int+1994, n = 27) 
+
+lag_mean_dens <- dat|>
+  group_by(Year_int) |>
+    summarize(Goby_lag = mean(GobyDens, na.rm=TRUE))
+ 
+lag_mean_dens %>%
+ ggplot(aes(Year_int, Goby_lag)) +
+  geom_point()
+
+#link to dat
+lag_mean_dens$Year_int <- lag_mean_dens$Year_int+1
+
+dat <- left_join(dat, lag_mean_dens, by = "Year_int")
+
+# give year 1 the mean lag density for all years
+year_1_lag <- mean(dat$Goby_lag, na.rm=TRUE)
+# put in data file for year 1  
+dat$Goby_lag <- ifelse(dat$Year_int == 1 | dat$Year_int == 10, year_1_lag, dat$Goby_lag)
+#scale
+dat$Goby_lag <- scale(dat$Goby_lag)
+
+#remove the survey level density
+dat <- dat |> select(-GobyDens)
+
+dat$Goby_lag <- as.numeric(dat$Goby_lag)
+
+
 str(dat)
 #View(dat)
 nrow(dat) #n = 364
@@ -163,7 +197,8 @@ dat.missing <- tibble(Goby=dat$Goby,
                       Micro=dat$Micro, #added 2024-01-23
                       Zone=as.factor(dat$Zone), 
                       Substrate=as.factor(dat$Substrate), 
-                      Area=dat$Area)
+                      Area=dat$Area,
+                      Goby_lag=dat$Goby_lag)
 dat.missing
 
 #remove variables with NAs except Temp, DO, and SAV ok
@@ -182,7 +217,6 @@ dat.list <- as.list(dat)  # for stan
 
 
 #need to convert substrate and zone to numbers
-#for now leave out
 
 
 dat <- tibble(Goby=dat$Goby, 
@@ -209,7 +243,8 @@ dat <- tibble(Goby=dat$Goby,
               Micro=dat$Micro,
               Zone=as.integer(dat$Zone), 
               Substrate=as.integer(dat$Substrate), 
-              Area=dat$Area)
+              Area=dat$Area,
+              Goby_lag=dat$Goby_lag)
 dat
 summary(dat$Area)
 sd(dat$Area)
