@@ -251,4 +251,7 @@ sd(dat$Area)
 dat$Zone
 
 
-
+dat |>
+  ggplot(aes(x = SC_count/Area, y = Goby/Area)) +
+  geom_point() +
+  geom_smooth()

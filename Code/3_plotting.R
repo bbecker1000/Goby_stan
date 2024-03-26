@@ -88,6 +88,8 @@ d.SC <- post %>% select(starts_with("SC")) %>%
     values_to = "SC") %>%
   select(-'case')
 
+hist(d.SC$SC)
+
 d.Breach <- post %>% 
   select(-contains("_2")) %>%     #remove _2
   select(starts_with("Breach")) %>%
@@ -154,7 +156,7 @@ dat$Breach <- dat$BreachDays
 
 #Subset data for the fit lines
 # grab random 100 samples near middle of the chain
-d <- d.all.post %>% filter(between(SAMPLE, 1900 , 2001) )
+d <- d.all.post %>% filter(between(SAMPLE, 1975 , 2001) )
 
 
 #%>%  #just take a few (50) samples from the data
@@ -266,7 +268,7 @@ p.rain
 
 #substrate Effects plot
 p.substrate <- ggplot(data = d, aes(x = as.factor(Substrate), y = mu/exp(Area))) + #, group = SAMPLE
-    geom_point(alpha = 0.05, color = "grey") + #posterior data
+    geom_point(alpha = 0.2, color = "grey") + #posterior data
     #stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), alpha=0.05, size=0.5) +
     geom_jitter(data = dat, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Zone), 
                 alpha = 0.25, color = "blue", width = 0.2) + #raw data
@@ -317,8 +319,8 @@ p.sav2
 
 #SC Effects plot
 #needs debugging
-ggplot(data = d, aes(x = SC/exp(Area), y = mu/exp(Area))) + #, group = SAMPLE
-  #geom_point(alpha = 0.05, color = "grey") + #posterior data
+p.SC <- ggplot(data = d, aes(x = SC, y = mu/exp(Area))) + #, group = SAMPLE
+  geom_point(alpha = 0.05, color = "gray") + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, size=0.75, 
                color = "red") +
@@ -326,13 +328,16 @@ ggplot(data = d, aes(x = SC/exp(Area), y = mu/exp(Area))) + #, group = SAMPLE
   #              formula = y~poly(x,2), 
   #              geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=0.5) +
-  geom_point(data = dat, aes(x = SC_count/exp(Area), y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
-  #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
-  ylim(0,300) + 
-  #xlim(0,30) +
+  geom_point(data = dat, aes(x = SC, y = Goby/exp(Area)), 
+             alpha = 0.25, color = "blue") + #raw data
+  geom_smooth(data = dat, aes(x = SC, y = Goby/exp(Area)),
+              method = "lm", se = FALSE, alpha = 0.25) +
+  ylim(0,200) + 
   ylab("Goby Density") +
   xlab("Sculpin Density") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
+p.SC
+
 
 
 #Micro Effects plot
@@ -387,9 +392,12 @@ p.temp2 <- ggplot(data = d, aes(x = Temp_2, y = mu/exp(Area))) + #, group = SAMP
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.temp2
 
+## panel plot
 p.all.effects <- plot_grid(p.breach, p.temp2, p.sav2, p.rain, p.micro, p.Goby_lag, p.year2)
 p.all.effects
 ggsave("Output/p.all.effects.lag.png", width = 30, height = 20, units = "cm")
+
+
 #random effects groups
 fit %>%
   spread_draws(a_Goby[Zone]) %>%
