@@ -28,7 +28,7 @@ names(as_tibble(link(fit)))
 
 post <- as.data.frame(link(fit))
 #just get post-warmup values
-post <- post[c(3001:6000),]   # if itel = 3000 post[c(2501:5000),]
+post <- post[c(3001:6000),]   # if iter = 3000 post[c(2501:5000),]
 
 # Need to plot: 
 # Goby(mu)/Area for:
@@ -146,7 +146,7 @@ d.all.post$Area <- rep(dat$Area, nrow(d.all.post)/nrow(dat)) #already logged
 Zone.labs <- c("East", "Northwest", "West")
 names(Zone.labs) <- c("1", "2", "3")
 
-#index for which data sample (cases = 301)
+#index for which data sample (cases = 314)
 d.all.post$SAMPLE <- rep(1:3000, each = nrow(dat))
 
 
@@ -154,13 +154,21 @@ d.all.post$SAMPLE <- rep(1:3000, each = nrow(dat))
 #fix names
 dat$Breach <- dat$BreachDays
 
+#attach raw data to df for the SC logit plot.
+d.all.post$SC_count <- rep(dat$SC_count, times = 3000)
+d.all.post$Breachdays <- rep(dat$BreachDays, times = 3000)
+d.all.post$SB_count <- rep(dat$SB_count, times = 3000)
+d.all.post$DO <- rep(dat$DO, times = 3000)
+d.all.post$SAV <- rep(dat$SAV, times = 3000)
+d.all.post$Temp_2 <- rep(dat$Temp_2, times = 3000)
+
 #Subset data for the fit lines
 # grab random 100 samples near middle of the chain
-d <- d.all.post %>% filter(between(SAMPLE, 1975 , 2001) )
+d <- d.all.post %>% filter(between(SAMPLE, 1950 , 2001) )
 
 
-#%>%  #just take a few (50) samples from the data
-p.breach <-  ggplot(data = d, aes(x = Breach, y = mu/exp(Area))) + #, group = SAMPLE
+#Breach using the raw breach data as x variable.
+p.breach <-  ggplot(data = d, aes(x = Breachdays, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "grey") + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, linewidth=0.75, color = "red") +
@@ -169,7 +177,7 @@ p.breach <-  ggplot(data = d, aes(x = Breach, y = mu/exp(Area))) + #, group = SA
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab("Goby Density") +
-  xlab("Breach Days") +
+  xlab("Annual Breach Days") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.breach
 
@@ -235,6 +243,25 @@ p.breach2 <- ggplot(data = d, aes(x = BreachDays_2, y = mu/exp(Area))) + #, grou
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.breach2
 
+#DO effects plot
+p.DO <-  ggplot(data = d, aes(x = DO, y = mu/exp(Area))) + #, group = SAMPLE
+  geom_point(alpha = 0.05, color = "gray") + #posterior data
+  
+  stat_smooth (data = d, method = "lm", 
+               geom="line", aes(group = SAMPLE), alpha=0.05, 
+               linewidth=0.75, color = "red") +
+  geom_point(data = dat, aes(x = DO, y = Goby/exp(Area)), alpha = 0.25, 
+             color = "blue") + #raw data
+  #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
+  ylim(0,200) + 
+  ylab("Gobys/m2") +
+  xlab("DO") +
+  facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))  
+p.DO
+
+
+
+
 #Wind effects plot 
 # no effect on goby, only has a sig coefficient in model
 p.wind <- ggplot(data = d, aes(x = Wind, y = mu/exp(Area))) + #, group = SAMPLE
@@ -281,15 +308,16 @@ p.substrate
 
 #SAV Effects plot
 p.sav <- ggplot(data = d, aes(x = SAV, y = mu/exp(Area))) + #, group = SAMPLE
-  geom_point(alpha = 0.05, color = "blue") + #posterior data
+  geom_jitter(alpha = 0.05, color = "grey", width = 0.1) + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.2, size=1, 
                color = "red") +
-  stat_smooth (data = d, method = "lm", 
-               formula = y~poly(x,2), 
-               geom="line", aes(group = SAMPLE), 
-               alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat, aes(x = SAV, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  # stat_smooth (data = d, method = "lm", 
+  #              formula = y~poly(x,2), 
+  #              geom="line", aes(group = SAMPLE), 
+  #              alpha=0.05, size=0.75, color = "red") +
+  geom_jitter(data = dat, aes(x = SAV, y = Goby/exp(Area)), alpha = 0.25, 
+              color = "blue", width = 0.1) + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab("Goby Density") +
@@ -318,25 +346,42 @@ p.sav2
 
 
 #SC Effects plot
-#needs debugging
-p.SC <- ggplot(data = d, aes(x = SC, y = mu/exp(Area))) + #, group = SAMPLE
-  geom_point(alpha = 0.05, color = "gray") + #posterior data
-  stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
-               alpha=0.05, size=0.75, 
-               color = "red") +
+
+p.SC <- ggplot(data = d, aes(x = as.factor(SC_count), y = mu/exp(Area))) + #, group = SAMPLE
+  geom_jitter(alpha = 0.05, color = "gray", width = 0.1) + #posterior data
+  #stat_smooth (data = d, method = "loess", geom="line", aes(group = SAMPLE), 
+   #            alpha=0.05, linewidth=0.75, 
+    #           color = "red") +
   # stat_smooth (data = d, method = "lm", 
   #              formula = y~poly(x,2), 
   #              geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=0.5) +
-  geom_point(data = dat, aes(x = SC, y = Goby/exp(Area)), 
-             alpha = 0.25, color = "blue") + #raw data
-  geom_smooth(data = dat, aes(x = SC, y = Goby/exp(Area)),
-              method = "lm", se = FALSE, alpha = 0.25) +
+  geom_jitter(data = dat, aes(x = SC_count+1, y = Goby/exp(Area)), 
+             alpha = 0.25, color = "blue", width = 0.1) + #raw data
   ylim(0,200) + 
   ylab("Goby Density") +
-  xlab("Sculpin Density") +
+  xlab("Sculpin Presence") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.SC
+
+
+p.SB <- ggplot(data = d, aes(x = as.factor(SB_count), y = mu/exp(Area))) + #, group = SAMPLE
+  geom_jitter(alpha = 0.05, color = "gray", width = 0.1) + #posterior data
+  #stat_smooth (data = d, method = "loess", geom="line", aes(group = SAMPLE), 
+  #            alpha=0.05, linewidth=0.75, 
+  #           color = "red") +
+  # stat_smooth (data = d, method = "lm", 
+  #              formula = y~poly(x,2), 
+  #              geom="line", aes(group = SAMPLE), 
+  #              alpha=0.05, size=0.5) +
+  geom_jitter(data = dat, aes(x = SB_count+1, y = Goby/exp(Area)), 
+              alpha = 0.25, color = "blue", width = 0.1) + #raw data
+  ylim(0,200) + 
+  ylab("Goby Density") +
+  xlab("Stickleback Presence") +
+  facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
+p.SB
+
 
 
 
@@ -393,9 +438,14 @@ p.temp2 <- ggplot(data = d, aes(x = Temp_2, y = mu/exp(Area))) + #, group = SAMP
 p.temp2
 
 ## panel plot
-p.all.effects <- plot_grid(p.breach, p.temp2, p.sav2, p.rain, p.micro, p.Goby_lag, p.year2)
+## want: Breach, Year_2, SB, Micro, Substrate, SAV, Goby_lag, Temp_2, DO) 
+
+p.all.effects <- cowplot::plot_grid(p.breach, p.temp2, p.DO, p.sav, p.rain, 
+                           p.SC, p.SB, p.micro, p.Goby_lag, p.year2,
+                           ncol=2, labels="AUTO"
+                           )
 p.all.effects
-ggsave("Output/p.all.effects.lag.png", width = 30, height = 20, units = "cm")
+ggsave("Output/p.all.effects.lag.png", width = 20, height = 30, units = "cm")
 
 
 #random effects groups
