@@ -19,7 +19,7 @@ library(brms)
 #library(tidyverse)
 library(ggthemes)
 
-theme_set(theme_gray())
+theme_set(theme_few())
 
 
 #rename model for plotting
@@ -177,7 +177,7 @@ p.breach <-  ggplot(data = d, aes(x = Breachdays, y = mu/exp(Area))) + #, group 
              color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("Annual Breach Days") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.breach
@@ -192,7 +192,7 @@ p.year <-  ggplot(data = d, aes(x = Year_int+1994, y = mu/exp(Area))) + #, group
                color = "blue") + #raw data
     #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
     ylim(0,200) + 
-    ylab("Gobys/m2") +
+    ylab(" ") +
     xlab("Year") +
     facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))  
 p.year
@@ -208,7 +208,7 @@ p.year2 <-  ggplot(data = d, aes(x = Year_2, y = mu/exp(Area))) + #, group = SAM
                color = "blue") + #raw data
     #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
     ylim(0,200) + 
-    ylab("Goby Density (m2)") +
+    ylab(" ") +
     xlab("Year") +
     facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs)) 
 p.year2
@@ -223,7 +223,7 @@ p.Goby_lag <-  ggplot(data = d, aes(x = Goby_lag, y = mu/exp(Area))) + #, group 
              color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Gobys/m2") +
+  ylab(" ") +
   xlab("Goby Density Year-1") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))  
 p.Goby_lag
@@ -239,7 +239,7 @@ p.breach2 <- ggplot(data = d, aes(x = BreachDays_2, y = mu/exp(Area))) + #, grou
   geom_point(data = dat, aes(x = BreachDays_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("Breach Days") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.breach2
@@ -255,7 +255,7 @@ p.DO <-  ggplot(data = d, aes(x = DO, y = mu/exp(Area))) + #, group = SAMPLE
              color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Gobys/m2") +
+  ylab(" ") +
   xlab("DO") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))  
 p.DO
@@ -272,7 +272,7 @@ p.wind <- ggplot(data = d, aes(x = Wind, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(data = dat, aes(x = Wind, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("East/West Wind Mean") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.wind
@@ -288,7 +288,7 @@ p.rain <- ggplot(data = d, aes(x = Rain, y = mu/exp(Area))) + #, group = SAMPLE
                geom="line", aes(group = SAMPLE), alpha=0.05, size=0.75, color = "red") +
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("Rainfall") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.rain
@@ -321,7 +321,7 @@ p.sav <- ggplot(data = d, aes(x = SAV, y = mu/exp(Area))) + #, group = SAMPLE
               color = "blue", width = 0.1) + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("SAV") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.sav
@@ -339,7 +339,7 @@ p.sav2 <- ggplot(data = d, aes(x = SAV_2, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(data = dat, aes(x = SAV_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("SAV^2") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.sav2
@@ -360,7 +360,7 @@ p.SC <- ggplot(data = d, aes(x = as.factor(SC_count), y = mu/exp(Area))) + #, gr
   geom_jitter(data = dat, aes(x = SC_count+1, y = Goby/exp(Area)), 
              alpha = 0.25, color = "blue", width = 0.1) + #raw data
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("Sculpin Presence") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.SC
@@ -378,7 +378,7 @@ p.SB <- ggplot(data = d, aes(x = as.factor(SB_count), y = mu/exp(Area))) + #, gr
   geom_jitter(data = dat, aes(x = SB_count+1, y = Goby/exp(Area)), 
               alpha = 0.25, color = "blue", width = 0.1) + #raw data
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("Stickleback Presence") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.SB
@@ -399,7 +399,7 @@ p.micro <- ggplot(data = d, aes(x = Micro, y = mu/exp(Area))) + #, group = SAMPL
   geom_point(data = dat, aes(x = Micro, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("Microsporidia Count") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.micro
@@ -418,7 +418,7 @@ ggplot(data = d, aes(x = Temp, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(data = dat, aes(x = Temp, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("Water Temperature") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 
@@ -433,10 +433,10 @@ p.temp2 <- ggplot(data = d, aes(x = Temp_2, y = mu/exp(Area))) + #, group = SAMP
   geom_point(data = dat, aes(x = Temp_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab("Goby Density") +
+  ylab(" ") +
   xlab("Water Temperature") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
-p.temp2 + theme_minimal()
+p.temp2 
 
 ## panel plot
 ## want: Breach, Year_2, SB, Micro, Substrate, SAV, Goby_lag, Temp_2, DO) 
@@ -455,10 +455,11 @@ p.all.effects <- cowplot::plot_grid(p.year2,
                                     p.DO, 
                                     p.rain, 
                             
-                           ncol=4, labels="AUTO"
+                           ncol=4, labels="auto", scale = 0.9, 
+                           vjust = 3, hjust = -2.2
                            )
 p.all.effects
-ggsave("Output/p.all.effects.lag.png", width = 30, height = 20, units = "cm")
+ggsave("Output/p.all.effects.lag.jpg", width = 35, height = 20, units = "cm")
 
 
 #random effects groups
