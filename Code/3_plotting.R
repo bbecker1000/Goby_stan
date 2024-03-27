@@ -1,24 +1,25 @@
 library(magrittr)
 library(dplyr)
 library(purrr)
-library(forcats)
+#library(forcats)
 library(tidyr)
-library(modelr)
-library(tidybayes)
-library(ggplot2)
+#library(modelr)
+#library(tidybayes)
+#(ggplot2)
 library(cowplot)
 library(rethinking)
 library(ggrepel)
 library(RColorBrewer)
-library(gganimate)
+#library(gganimate)
 library(brms)
-library(sjPlot)
-library(marginaleffects)
-library(cowplot)
-library(rstan)
-library(tidybayes.rethinking)
+#library(sjPlot)
+#library(marginaleffects)
+#library(rstan)
+#library(tidybayes.rethinking)
+#library(tidyverse)
+library(ggthemes)
 
-theme_set(theme_tidybayes() + panel_border())
+theme_set(theme_gray())
 
 
 #rename model for plotting
@@ -295,10 +296,10 @@ p.rain
 
 #substrate Effects plot
 p.substrate <- ggplot(data = d, aes(x = as.factor(Substrate), y = mu/exp(Area))) + #, group = SAMPLE
-    geom_point(alpha = 0.2, color = "grey") + #posterior data
+    geom_jitter(alpha = 0.2, color = "grey", width=0.1) + #posterior data
     #stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), alpha=0.05, size=0.5) +
     geom_jitter(data = dat, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Zone), 
-                alpha = 0.25, color = "blue", width = 0.2) + #raw data
+                alpha = 0.25, color = "blue", width = 0.1) + #raw data
     #geom_boxplot(data = dat, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Substrate), alpha = 0.25) + #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
     ylim(0,200) + 
     ylab("Goby Density") +
@@ -435,17 +436,29 @@ p.temp2 <- ggplot(data = d, aes(x = Temp_2, y = mu/exp(Area))) + #, group = SAMP
   ylab("Goby Density") +
   xlab("Water Temperature") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
-p.temp2
+p.temp2 + theme_minimal()
 
 ## panel plot
 ## want: Breach, Year_2, SB, Micro, Substrate, SAV, Goby_lag, Temp_2, DO) 
 
-p.all.effects <- cowplot::plot_grid(p.breach, p.temp2, p.DO, p.sav, p.rain, 
-                           p.SC, p.SB, p.micro, p.Goby_lag, p.year2,
-                           ncol=2, labels="AUTO"
+p.all.effects <- cowplot::plot_grid(p.year2,
+                                    p.SC, 
+                                    p.SB, 
+                                    p.micro, 
+                                    
+                                    p.substrate,
+                                    p.sav,
+                                    p.Goby_lag,
+                                    p.temp2, 
+  
+                                    p.breach, 
+                                    p.DO, 
+                                    p.rain, 
+                            
+                           ncol=4, labels="AUTO"
                            )
 p.all.effects
-ggsave("Output/p.all.effects.lag.png", width = 20, height = 30, units = "cm")
+ggsave("Output/p.all.effects.lag.png", width = 30, height = 20, units = "cm")
 
 
 #random effects groups
