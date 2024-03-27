@@ -158,7 +158,7 @@ plot.posteriors.wide %>%
                      values=c("red", "darkgray", "green3")) + 
   coord_flip() +
   scale_x_discrete(limits=rev) +
-  theme_gray(base_size = 16)
+  theme_few(base_size = 16)
 
 ggsave("Output/forest.plot.Yearlag.png", width = 20, height = 30, units = "cm")
 str(rethinking::extract.samples(Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS.lag))
