@@ -17,6 +17,8 @@ library(sjPlot)
 library(marginaleffects)
 goby_master <- read_csv("Data/goby_master_2023.csv")
 
+hist(goby_master$Area)
+
 breach_days <- read_excel("Data/RodeoLagoon-Status_WY1995_2023.xlsx", 
                           col_types = c("date", "numeric", "numeric", "text", "text"))
 #keep first three columns
@@ -207,7 +209,7 @@ dat.missing <- dat.missing %>%
             all_vars(!is.na(.)))
 
 ##remove cases with NAs
-dat <- na.omit(dat) #removes 50 cases !  new n = 299, most missingness due to DO
+dat <- na.omit(dat) #, most missingness due to DO
 nrow(dat) #314
 
 

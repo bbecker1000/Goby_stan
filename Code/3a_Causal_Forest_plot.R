@@ -2,7 +2,7 @@
 #causal plot
 
 post <- extract.samples(fit)
-PROBS = c(0.11, 0.5, 0.9) ##89 % CIs
+PROBS = c(0.055, 0.5, 0.945) ##89 % CIs
 #Effect of Rain --> Breach --> DO --> Goby
 Rain_Breach_DO<- as_tibble(quantile( with(post, beta_Rain*beta_BreachDays*beta_DO), probs = PROBS)) ## NS
 #Effect of Breach --> DO --> Goby
