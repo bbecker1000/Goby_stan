@@ -15,9 +15,11 @@ library(rstan)
 library(rstanarm)
 library(sjPlot)
 library(marginaleffects)
-goby_master <- read_csv("C:/projects/Goby_stan/Data/goby_master_2023.csv")
+goby_master <- read_csv("Data/goby_master_2023.csv")
 
-breach_days <- read_excel("C:/projects/Goby_stan/Data/RodeoLagoon-Status_WY1995_2023.xlsx", 
+hist(goby_master$Area)
+
+breach_days <- read_excel("Data/RodeoLagoon-Status_WY1995_2023.xlsx", 
                           col_types = c("date", "numeric", "numeric", "text", "text"))
 #keep first three columns
 breach_days <- breach_days[,c(1:3)]
@@ -60,14 +62,22 @@ summary(goby_master$micro_sum)
 dat.temp <- goby_master
 
 
+hist(dat.temp$Year)
 
+#2024-03-19 per DF
+#remove 2021 due to poor sampling conditions (flood)
+
+#dat.temp <- dat.temp %>% filter(Year != 2021)
+hist(dat.temp$Year)
 
 ## Prep Data
 #IVs
 Goby   <- dat.temp$Sum_TW  # must be non-negative
-Year   <- scale(dat.temp$Year)
+Year   <- scale(dat.temp$Year-1995)
+Year_2   <- scale((dat.temp$Year-1995)^2)
 Year_int <- as.integer(dat.temp$Year-1995)
 SAV    <- scale(dat.temp$SAV)
+SAV_2    <- scale(dat.temp$SAV^2)
 SB     <- scale(dat.temp$Sum_SB)
 SB_count     <- dat.temp$Sum_SB # if using counts
 SC     <- scale(dat.temp$Sum_SC)
@@ -85,10 +95,6 @@ BreachDays_2 <- scale(dat.temp$BreachDays^2)
 BreachDays_Count_2 <- (dat.temp$BreachDays^2)
 #Breach <- as.factor(dat.temp$Since_Breach)  # need to fix this, but categorical is wonky
 Wind   <- scale(dat.temp$u_mean)
-
-
-
-
 
 Zone   <- (dat.temp$Zone)
 Substrate   <- (dat.temp$Dom_substrate)
@@ -118,13 +124,50 @@ Substrate <- as.integer(ifelse(dat.temp$Dom_substrate == "corophium_tubes", "2",
 Area <- log(dat.temp$Area)
 
 
-dat <- data.frame(Goby=Goby, Year=Year, Year_int = Year_int, SAV=SAV, SB=SB, SB_count=SB_count, SC=SC, 
+dat <- data.frame(Goby=Goby, Year=Year, Year_2=Year_2, Year_int = Year_int, SAV=SAV, SAV_2=SAV_2,
+                  SB=SB, SB_count=SB_count, SC=SC, 
                   SC_count=SC_count, Rain=Rain, Temp=Temp, Temp_2=Temp_2, #added 2024-02-09
                   DO=DO, Breach=Breach,  Breach_count=Breach_count, #added 2024-01-23
                   BreachDays=BreachDays, BreachDays_2=BreachDays_2,
                   BreachDays_Count=BreachDays_Count, BreachDays_Count_2=BreachDays_Count_2,
                   Wind=Wind, Micro=Micro,
                   Zone=Zone, Substrate=Substrate, Area=Area)
+
+
+
+## 2024-03-24
+## create lagged t-1 overall TWG/AREA density to account for 
+## mechanistic larval supply
+## in lieu of ar()
+
+dat$GobyDens <- dat$Goby/dat$Area
+hist(dat$GobyDens) 
+hist(dat$Year_int+1994, n = 27) 
+
+lag_mean_dens <- dat|>
+  group_by(Year_int) |>
+    summarize(Goby_lag = mean(GobyDens, na.rm=TRUE))
+ 
+lag_mean_dens %>%
+ ggplot(aes(Year_int, Goby_lag)) +
+  geom_point()
+
+#link to dat
+lag_mean_dens$Year_int <- lag_mean_dens$Year_int+1
+
+dat <- left_join(dat, lag_mean_dens, by = "Year_int")
+
+# give year 1 the mean lag density for all years
+year_1_lag <- mean(dat$Goby_lag, na.rm=TRUE)
+# put in data file for year 1  
+dat$Goby_lag <- ifelse(dat$Year_int == 1 | dat$Year_int == 10, year_1_lag, dat$Goby_lag)
+#scale
+dat$Goby_lag <- scale(dat$Goby_lag)
+
+#remove the survey level density
+dat <- dat |> select(-GobyDens)
+
+dat$Goby_lag <- as.numeric(dat$Goby_lag)
 
 
 str(dat)
@@ -134,8 +177,10 @@ nrow(dat) #n = 364
 #save a file with all cases including missing cases
 dat.missing <- tibble(Goby=dat$Goby, 
                       Year=dat$Year, 
+                      Year_2=dat$Year_2, 
                       Year_int=dat$Year_int, 
                       SAV=dat$SAV, 
+                      SAV_2=dat$SAV_2,
                       SB=dat$SB,
                       SB_count=dat$SB_count,
                       SC=dat$SC, 
@@ -154,7 +199,8 @@ dat.missing <- tibble(Goby=dat$Goby,
                       Micro=dat$Micro, #added 2024-01-23
                       Zone=as.factor(dat$Zone), 
                       Substrate=as.factor(dat$Substrate), 
-                      Area=dat$Area)
+                      Area=dat$Area,
+                      Goby_lag=dat$Goby_lag)
 dat.missing
 
 #remove variables with NAs except Temp, DO, and SAV ok
@@ -163,7 +209,7 @@ dat.missing <- dat.missing %>%
             all_vars(!is.na(.)))
 
 ##remove cases with NAs
-dat <- na.omit(dat) #removes 50 cases !  new n = 299, most missingness due to DO
+dat <- na.omit(dat) #, most missingness due to DO
 nrow(dat) #314
 
 
@@ -173,13 +219,14 @@ dat.list <- as.list(dat)  # for stan
 
 
 #need to convert substrate and zone to numbers
-#for now leave out
 
 
 dat <- tibble(Goby=dat$Goby, 
               Year=dat$Year, 
+              Year_2=dat$Year_2, 
               Year_int=dat$Year_int, 
               SAV=dat$SAV, 
+              SAV_2=dat$SAV_2,
               SB=dat$SB,
               SB_count=dat$SB_count,
               SC=dat$SC, 
@@ -198,19 +245,15 @@ dat <- tibble(Goby=dat$Goby,
               Micro=dat$Micro,
               Zone=as.integer(dat$Zone), 
               Substrate=as.integer(dat$Substrate), 
-              Area=dat$Area)
+              Area=dat$Area,
+              Goby_lag=dat$Goby_lag)
 dat
 summary(dat$Area)
 sd(dat$Area)
 dat$Zone
 
 
-ggplot(dat, aes(x = BreachDays_Count, y = Goby/Area, color = Zone)) +
+dat |>
+  ggplot(aes(x = SC_count/Area, y = Goby/Area)) +
   geom_point() +
-  geom_smooth(method = "loess") +
-  facet_wrap(~Zone)
-
-ggplot(dat, aes(x = Micro, y = Goby/Area)) +
-  geom_point() +
-  geom_smooth(method = "loess")
-
+  geom_smooth()

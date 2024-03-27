@@ -1,30 +1,25 @@
 library(rstan)
 
+#updated 2024-03-19
 stan_program <- '
 data{
-    array[314] int BreachDays_Count_2;
-    array[314] int BreachDays_Count;
-    array[314] int Breach_count;
-     vector[314] Breach;
-     vector[314] SC;
-     vector[314] SB;
-    array[314] int Year_int;
-    array[314] int Goby;
-     vector[314] Temp_2;
-     vector[314] BreachDays_2;
-     vector[314] Micro;
-     vector[314] Year;
-    array[314] int Zone;
-     vector[314] Wind;
-    array[314] int SB_count;
-    array[314] int SC_count;
-     vector[314] Area;
-    array[314] int Substrate;
-     vector[314] BreachDays;
-     vector[314] Rain;
-     vector[314] SAV;
-     vector[314] Temp;
-     vector[314] DO;
+     vector[301] Temp_2;
+     vector[301] BreachDays_2;
+     vector[301] Micro;
+     vector[301] SAV_2;
+     vector[301] Year_2;
+     vector[301] Year;
+    array[301] int Zone;
+     vector[301] Wind;
+    array[301] int SB_count;
+    array[301] int SC_count;
+     vector[301] Area;
+    array[301] int Substrate;
+     vector[301] BreachDays;
+     vector[301] Rain;
+     vector[301] SAV;
+     vector[301] Temp;
+     vector[301] DO;
 }
 parameters{
      real mu_Zone;
@@ -33,6 +28,7 @@ parameters{
      real beta_Micro;
      real beta_Temp_2;
      real beta_Temp;
+     real beta_Year_2;
      real beta_Year;
      real beta_SB_count;
      real a_Temp;
@@ -45,32 +41,34 @@ parameters{
      real beta_Rain;
      real beta_SC_count;
      real beta_SAV;
+     real beta_SAV_2;
      real beta_DO;
      real beta_BreachDays;
      real beta_BreachDays_2;
      real beta_Substrate;
      real<lower=0> tau;
-     real<lower=0> phi;
-     real<lower=0> SB_phi;
-     real<lower=0> SC_phi;
+     real phi;
+     real SB_phi;
+     real SC_phi;
 }
 model{
-     vector[314] mu;
-     vector[314] DO_nu;
-     vector[314] Temp_nu;
-     vector[314] SB_mu;
-     vector[314] SC_mu;
-     vector[314] Breach_nu;
-     vector[314] SAV_nu;
-    SC_phi ~ exponential( 1 );
-    SB_phi ~ exponential( 1 );
-    phi ~ exponential( 1 );
+     vector[301] mu;
+     vector[301] DO_nu;
+     vector[301] Temp_nu;
+     vector[301] SB_mu;
+     vector[301] SC_mu;
+     vector[301] Breach_nu;
+     vector[301] SAV_nu;
+    SC_phi ~ normal( 1 , 5 );
+    SB_phi ~ normal( 1 , 5 );
+    phi ~ normal( 1 , 5 );
     tau ~ exponential( 1 );
     beta_Substrate ~ normal( 0.25 , 0.25 );
     beta_BreachDays_2 ~ normal( 0.25 , 0.25 );
     beta_BreachDays ~ normal( 0.25 , 0.25 );
     beta_DO ~ normal( 0.25 , 0.25 );
-    beta_SAV ~ normal( 0.25 , 0.25 );
+    beta_SAV_2 ~ normal( 0 , 0.25 );
+    beta_SAV ~ normal( 0 , 0.25 );
     beta_SC_count ~ normal( -0.1 , 0.25 );
     beta_Rain ~ normal( 0.25 , 0.25 );
     a_Goby ~ normal( 0 , 0.75 );
@@ -82,55 +80,55 @@ model{
     a_Temp ~ normal( 0 , 0.75 );
     beta_SB_count ~ normal( 0 , 0.75 );
     beta_Year ~ normal( 0 , 0.75 );
+    beta_Year_2 ~ normal( 0 , 0.75 );
     beta_Temp ~ normal( 0 , 0.75 );
     beta_Temp_2 ~ normal( 0 , 0.75 );
     beta_Micro ~ normal( 0 , 0.75 );
     beta_Wind ~ normal( 0 , 0.75 );
-    for ( i in 1:314 ) {
+    for ( i in 1:301 ) {
         SAV_nu[i] = a_SAV + beta_DO * DO[i] + beta_Temp * Temp[i];
     }
     SAV ~ normal( SAV_nu , tau );
-    for ( i in 1:314 ) {
+    for ( i in 1:301 ) {
         Breach_nu[i] = a_BreachDays + beta_Rain * Rain[i];
     }
     BreachDays ~ normal( Breach_nu , tau );
-    for ( i in 1:314 ) {
+    for ( i in 1:301 ) {
         SC_mu[i] = a_SC + beta_Substrate * Substrate[i] + beta_DO * DO[i] + beta_SAV * SAV[i] + Area[i];
         SC_mu[i] = exp(SC_mu[i]);
     }
-    SC_count ~ neg_binomial_2( SC_mu , SC_phi );
-    for ( i in 1:314 ) {
+    SC_count ~ neg_binomial_2( SC_mu , exp(SC_phi) );
+    for ( i in 1:301 ) {
         SB_mu[i] = a_SB + beta_DO * DO[i] + beta_SAV * SAV[i] + beta_SC_count * SC_count[i] + Area[i];
         SB_mu[i] = exp(SB_mu[i]);
     }
-    SB_count ~ neg_binomial_2( SB_mu , SB_phi );
-    for ( i in 1:314 ) {
+    SB_count ~ neg_binomial_2( SB_mu , exp(SB_phi) );
+    for ( i in 1:301 ) {
         Temp_nu[i] = a_Temp + beta_BreachDays * BreachDays[i] + beta_Wind * Wind[i];
     }
     Temp ~ normal( Temp_nu , tau );
-    for ( i in 1:314 ) {
+    for ( i in 1:301 ) {
         DO_nu[i] = a_DO + beta_Temp * Temp[i] + beta_Wind * Wind[i];
     }
     DO ~ normal( DO_nu , tau );
     tau_Zone ~ exponential( 1 );
     mu_Zone ~ normal( 0 , 0.5 );
     a_Goby ~ normal( mu_Zone , tau_Zone );
-    for ( i in 1:314 ) {
-        mu[i] = a_Goby[Zone[i]] + beta_Year * Year[i] + beta_SC_count * SC_count[i] + beta_SAV * SAV[i] + beta_SB_count * SB_count[i] + beta_DO * DO[i] + beta_Micro * Micro[i] + beta_BreachDays * BreachDays[i] + beta_BreachDays_2 * BreachDays_2[i] + beta_Substrate * Substrate[i] + beta_Wind * Wind[i] + beta_Temp * Temp[i] + beta_Temp_2 * Temp_2[i] + Area[i];
+    for ( i in 1:301 ) {
+        mu[i] = a_Goby[Zone[i]] + beta_Year * Year[i] + beta_Year_2 + Year_2[i] + beta_SC_count * SC_count[i] + beta_SAV * SAV[i] + beta_SAV_2 * SAV_2[i] + beta_SB_count * SB_count[i] + beta_DO * DO[i] + beta_Micro * Micro[i] + beta_BreachDays * BreachDays[i] + beta_BreachDays_2 * BreachDays_2[i] + beta_Substrate * Substrate[i] + beta_Wind * Wind[i] + beta_Temp * Temp[i] + beta_Temp_2 * Temp_2[i] + Area[i];
         mu[i] = exp(mu[i]);
     }
-    Goby ~ neg_binomial_2( mu , phi );
+    Goby ~ neg_binomial_2( mu , exp(phi) );
 }
 '
 
-# dat$Zone <- as.integer(dat$Zone)
-# dat$Substrate <- as.integer(dat$Substrate)
-stan_data <- dat
+stan_data <- as.data.frame(dat)
 
 #run model
 
-m1 <- stan(model_code = stan_program, data = stan_data, 
-           chains=3 , cores=parallel::detectCores() , iter=4000)
+#remove rethinking packages to make sure rstan uses an rstan stanfit
+m1 <- stan(model_code = stan_program, data = list(stan_data), 
+           chains=3 , cores=parallel::detectCores() , iter=3000)
 beepr::beep()
 #runs in 3.5 minutes after compilation
 
