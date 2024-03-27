@@ -66,6 +66,9 @@ so look at different slopes by zone for wind     DONE WITH INTERACTION TERM 2024
 2024-03-13
 
 22. Use geom function to plot the slopes of the table plot.posteriors.wide
-
+23. Decide not to add a year lag effect for each sample for the ar(1)
+    -McElreath pans ar(1) as generally non-sceintific p. 542.  no theory...should add another causal covariate instread of ar()
+    -TWG generally only live 1 year...so little dependence on adults, mostly new recruits, which should be primarily due to causal   agents.  
+    -Could be some causal effect related to previous year spawning pop and egg production, so could use total count for previous year as indication of reproductive potential for the estuary?
 
 
