@@ -35,30 +35,27 @@ set.seed(123)
 
 DAG_GOBY <- dagitty("dag{ 
   Year -> GOBY ;
-  O2 -> GOBY ;
+  DO_Temp -> GOBY ;
   Stickleback -> GOBY ;
   Sculpin -> GOBY ;
   Microsporidia -> GOBY ;
   Substrate -> GOBY ;
   SAV -> GOBY ;
-  Rain -> Breach -> O2 -> GOBY ;
-  Rain -> O2 -> GOBY ;
-  Rain -> Microsporidia -> GOBY ;
-  Wind -> O2 -> GOBY ;
-  Zone -> O2 -> GOBY ;
-  O2 -> SAV -> GOBY ;
-  O2 -> Sculpin -> GOBY ;
-  O2 -> Stickleback -> GOBY ;
-  O2 -> SAV -> Stickleback ;
-  O2 -> SAV -> Sculpin ;
+  Rain -> Breach -> DO_Temp -> GOBY ;
+  Rain -> DO_Temp -> GOBY ;
+  Wind -> DO_Temp -> GOBY ;
+  Zone -> DO_Temp -> GOBY ;
+  DO_Temp -> SAV -> GOBY ;
+  DO_Temp -> Sculpin -> GOBY ;
+  DO_Temp -> Stickleback -> GOBY ;
+  DO_Temp -> SAV -> Stickleback ;
+  DO_Temp -> SAV -> Sculpin ;
   Substrate -> Sculpin -> GOBY;
-  Sculpin -> Stickleback;
   Wind -> Zone;
-  O2 -> Food_U -> GOBY
   
   
   Year [exposure] ;
-  O2 [exposure] ;
+  DO_Temp [exposure] ;
   Zone [exposure] ;
   Stickleback [exposure] ;
   Sculpin [exposure] ;
@@ -68,7 +65,6 @@ DAG_GOBY <- dagitty("dag{
   Breach [exposure] ;
   Rain [exposure] ;
   Wind [exposure] ;
-  Food_U [exposure] ;
 }")
 
 ## add in zone?
@@ -80,20 +76,18 @@ impliedConditionalIndependencies(DAG_GOBY)
 
 # to pretty up the plot 
 # not done yet
-coordinates(DAG_GOBY) <- list(x=c(Year=1,O2=3,
-                                  Stickleback=3,Sculpin=5,
+coordinates(DAG_GOBY) <- list(x=c(Year=1,DO_Temp=3,
+                                  Stickleback=3,Sculpin=4,
                                   Rain=1,Microsporidia=1, 
                                   Substrate=3, SAV=5, 
                                   Breach=3, Wind=5, 
-                                  Zone= 5, GOBY=1,
-                                  Food_U=2),
-                              y=c(Year=3,O2=-3,
+                                  Zone= 5, GOBY=1),
+                              y=c(Year=3,DO_Temp=-3,
                                   Stickleback=-1,Sculpin=1,
                                   Rain=-5,Microsporidia=-3, 
-                                  Substrate=3, SAV=0, 
-                                  Breach=-5, Wind=-3, 
-                                  Zone=-5, GOBY=0,
-                                  Food_U=-2.5))
+                                  Substrate=3, SAV=-1, 
+                                  Breach=-5, Wind=-5, 
+                                  Zone=-3, GOBY=0))
 plot(DAG_GOBY)
 
 

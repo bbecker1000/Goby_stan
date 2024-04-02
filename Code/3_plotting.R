@@ -140,6 +140,42 @@ d.all.post$Micro <- rep(dat$Micro, nrow(d.all.post)/nrow(dat))
 d.all.post$SAV_2 <- rep(dat$SAV_2, nrow(d.all.post)/nrow(dat)) 
 d.all.post$Area <- rep(dat$Area, nrow(d.all.post)/nrow(dat)) #already logged
 
+## now add some original data for plotting on original scale
+d.all.post$Year.unscaled <- 
+  rep(dat.for.effects.plot$Year.unscaled, nrow(d.all.post)/nrow(dat.for.effects.plot)) 
+d.all.post$SAV.unscaled <- 
+  rep(dat.for.effects.plot$SAV.unscaled, nrow(d.all.post)/nrow(dat.for.effects.plot)) 
+d.all.post$Temp.unscaled <- 
+  rep(dat.for.effects.plot$Temp.unscaled, nrow(d.all.post)/nrow(dat.for.effects.plot)) 
+d.all.post$DO.unscaled <- 
+  rep(dat.for.effects.plot$DO.unscaled, nrow(d.all.post)/nrow(dat.for.effects.plot)) 
+d.all.post$Rain.unscaled <- 
+  rep(dat.for.effects.plot$Rain.unscaled, nrow(d.all.post)/nrow(dat.for.effects.plot)) 
+
+d.all.post$Breach.unscaled <- 
+  rep(dat.for.effects.plot$Breach.unscaled, nrow(d.all.post)/nrow(dat.for.effects.plot)) 
+
+
+#and also to dat.plot
+dat.plot <- dat
+
+dat.plot$Year.unscaled <- 
+  rep(dat.for.effects.plot$Year.unscaled)
+dat.plot$SAV.unscaled <- 
+  rep(dat.for.effects.plot$SAV.unscaled)
+dat.plot$Temp.unscaled <- 
+  rep(dat.for.effects.plot$Temp.unscaled) 
+dat.plot$DO.unscaled <- 
+  rep(dat.for.effects.plot$DO.unscaled) 
+dat.plot$Rain.unscaled <- 
+  rep(dat.for.effects.plot$Rain.unscaled) 
+dat.plot$Breach.unscaled <- 
+  rep(dat.for.effects.plot$Breach.unscaled) 
+
+
+
+
+
 
 # Zone plotting for facets
 # 1 = E, 2 = NW, 3 = W
@@ -163,17 +199,23 @@ d.all.post$DO <- rep(dat$DO, times = 3000)
 d.all.post$SAV <- rep(dat$SAV, times = 3000)
 d.all.post$Temp_2 <- rep(dat$Temp_2, times = 3000)
 
+
+
+
+
+
+
 #Subset data for the fit lines
 # grab random 100 samples near middle of the chain
 d <- d.all.post %>% filter(between(SAMPLE, 1950 , 2001) )
 
 
 #Breach using the raw breach data as x variable.
-p.breach <-  ggplot(data = d, aes(x = Breachdays, y = mu/exp(Area))) + #, group = SAMPLE
+p.breach <-  ggplot(data = d, aes(x = Breach.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "grey") + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, linewidth=0.75, color = "red") +
-  geom_point(data = dat, aes(x = Breach, y = Goby/exp(Area)), alpha = 0.25, 
+  geom_point(data = dat.plot, aes(x = Breach.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
              color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
@@ -188,7 +230,7 @@ p.year <-  ggplot(data = d, aes(x = Year_int+1994, y = mu/exp(Area))) + #, group
 
     stat_smooth (data = d, method = "lm", 
                  geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
-    geom_point(data = dat, aes(x = Year_int+1994, y = Goby/exp(Area)), alpha = 0.25, 
+    geom_point(data = dat.plot, aes(x = Year_int+1994, y = Goby/exp(Area)), alpha = 0.25, 
                color = "blue") + #raw data
     #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
     ylim(0,200) + 
@@ -197,14 +239,16 @@ p.year <-  ggplot(data = d, aes(x = Year_int+1994, y = mu/exp(Area))) + #, group
     facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))  
 p.year
   
-  
+
+
+
 #Year^2 effects plot
-p.year2 <-  ggplot(data = d, aes(x = Year_2, y = mu/exp(Area))) + #, group = SAMPLE
+p.year2 <-  ggplot(data = d, aes(x = Year_int+1995, y = mu/exp(Area))) + #, group = SAMPLE
     geom_point(alpha = 0.05, color = "gray") + #posterior data
     stat_smooth (data = d, method = "lm", 
                  formula = y~poly(x,2),
                  geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
-    geom_point(data = dat, aes(x = Year_2, y = Goby/exp(Area)), alpha = 0.25, 
+    geom_point(data = dat.plot, aes(x = Year_int+1995, y = Goby/exp(Area)), alpha = 0.25, 
                color = "blue") + #raw data
     #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
     ylim(0,200) + 
@@ -219,7 +263,7 @@ p.Goby_lag <-  ggplot(data = d, aes(x = Goby_lag, y = mu/exp(Area))) + #, group 
   
   stat_smooth (data = d, method = "lm", 
                geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
-  geom_point(data = dat, aes(x = Goby_lag, y = Goby/exp(Area)), alpha = 0.25, 
+  geom_point(data = dat.plot, aes(x = Goby_lag, y = Goby/exp(Area)), alpha = 0.25, 
              color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
@@ -236,7 +280,7 @@ p.breach2 <- ggplot(data = d, aes(x = BreachDays_2, y = mu/exp(Area))) + #, grou
   stat_smooth (data = d, method = "lm", 
                formula = y~poly(x,2),
                geom="line", aes(group = SAMPLE), alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat, aes(x = BreachDays_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  geom_point(data = dat.plot, aes(x = BreachDays_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -244,14 +288,18 @@ p.breach2 <- ggplot(data = d, aes(x = BreachDays_2, y = mu/exp(Area))) + #, grou
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.breach2
 
+
+
+
 #DO effects plot
-p.DO <-  ggplot(data = d, aes(x = DO, y = mu/exp(Area))) + #, group = SAMPLE
+
+p.DO <-  ggplot(data = d, aes(x = DO.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "gray") + #posterior data
   
   stat_smooth (data = d, method = "lm", 
                geom="line", aes(group = SAMPLE), alpha=0.05, 
                linewidth=0.75, color = "red") +
-  geom_point(data = dat, aes(x = DO, y = Goby/exp(Area)), alpha = 0.25, 
+  geom_point(data = dat.plot, aes(x = DO.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
              color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
@@ -269,7 +317,7 @@ p.wind <- ggplot(data = d, aes(x = Wind, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "blue") + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat, aes(x = Wind, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  geom_point(data = dat.plot, aes(x = Wind, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -279,10 +327,10 @@ p.wind
 
 
 #Rain effects plot 
-p.rain <- ggplot(data = d, aes(x = Rain, y = mu/exp(Area))) + #, group = SAMPLE
+p.rain <- ggplot(data = d, aes(x = Rain.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "gray") + #posterior data
   #stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), alpha=0.05, size=0.5) +
-  geom_point(data = dat, aes(x = Rain, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  geom_point(data = dat.plot, aes(x = Rain.unscaled, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   stat_smooth (data = d, method = "lm", 
                #formula = y~poly(x,2), 
                geom="line", aes(group = SAMPLE), alpha=0.05, size=0.75, color = "red") +
@@ -298,9 +346,9 @@ p.rain
 p.substrate <- ggplot(data = d, aes(x = as.factor(Substrate), y = mu/exp(Area))) + #, group = SAMPLE
     geom_jitter(alpha = 0.2, color = "grey", width=0.1) + #posterior data
     #stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), alpha=0.05, size=0.5) +
-    geom_jitter(data = dat, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Zone), 
+    geom_jitter(data = dat.plot, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Zone), 
                 alpha = 0.25, color = "blue", width = 0.1) + #raw data
-    #geom_boxplot(data = dat, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Substrate), alpha = 0.25) + #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
+    #geom_boxplot(data = dat.plot, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Substrate), alpha = 0.25) + #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
     ylim(0,200) + 
     ylab("Goby Density") +
     xlab("Substrate") +
@@ -308,7 +356,7 @@ p.substrate <- ggplot(data = d, aes(x = as.factor(Substrate), y = mu/exp(Area)))
 p.substrate
 
 #SAV Effects plot
-p.sav <- ggplot(data = d, aes(x = SAV, y = mu/exp(Area))) + #, group = SAMPLE
+p.sav <- ggplot(data = d, aes(x = SAV.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
   geom_jitter(alpha = 0.05, color = "grey", width = 0.1) + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.2, size=1, 
@@ -317,7 +365,7 @@ p.sav <- ggplot(data = d, aes(x = SAV, y = mu/exp(Area))) + #, group = SAMPLE
   #              formula = y~poly(x,2), 
   #              geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=0.75, color = "red") +
-  geom_jitter(data = dat, aes(x = SAV, y = Goby/exp(Area)), alpha = 0.25, 
+  geom_jitter(data = dat.plot, aes(x = SAV.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
               color = "blue", width = 0.1) + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
@@ -336,7 +384,7 @@ p.sav2 <- ggplot(data = d, aes(x = SAV_2, y = mu/exp(Area))) + #, group = SAMPLE
                formula = y~poly(x,2), 
                geom="line", aes(group = SAMPLE), 
                alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat, aes(x = SAV_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  geom_point(data = dat.plot, aes(x = SAV_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -347,7 +395,7 @@ p.sav2
 
 
 #SC Effects plot
-
+#make sure run binary code before logistic model !
 p.SC <- ggplot(data = d, aes(x = as.factor(SC_count), y = mu/exp(Area))) + #, group = SAMPLE
   geom_jitter(alpha = 0.05, color = "gray", width = 0.1) + #posterior data
   #stat_smooth (data = d, method = "loess", geom="line", aes(group = SAMPLE), 
@@ -357,7 +405,7 @@ p.SC <- ggplot(data = d, aes(x = as.factor(SC_count), y = mu/exp(Area))) + #, gr
   #              formula = y~poly(x,2), 
   #              geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=0.5) +
-  geom_jitter(data = dat, aes(x = SC_count+1, y = Goby/exp(Area)), 
+  geom_jitter(data = dat.plot, aes(x = SC_count+1, y = Goby/exp(Area)), 
              alpha = 0.25, color = "blue", width = 0.1) + #raw data
   ylim(0,200) + 
   ylab(" ") +
@@ -365,7 +413,7 @@ p.SC <- ggplot(data = d, aes(x = as.factor(SC_count), y = mu/exp(Area))) + #, gr
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.SC
 
-
+#make sure run binary code before logistic model !
 p.SB <- ggplot(data = d, aes(x = as.factor(SB_count), y = mu/exp(Area))) + #, group = SAMPLE
   geom_jitter(alpha = 0.05, color = "gray", width = 0.1) + #posterior data
   #stat_smooth (data = d, method = "loess", geom="line", aes(group = SAMPLE), 
@@ -375,7 +423,7 @@ p.SB <- ggplot(data = d, aes(x = as.factor(SB_count), y = mu/exp(Area))) + #, gr
   #              formula = y~poly(x,2), 
   #              geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=0.5) +
-  geom_jitter(data = dat, aes(x = SB_count+1, y = Goby/exp(Area)), 
+  geom_jitter(data = dat.plot, aes(x = SB_count+1, y = Goby/exp(Area)), 
               alpha = 0.25, color = "blue", width = 0.1) + #raw data
   ylim(0,200) + 
   ylab(" ") +
@@ -396,7 +444,7 @@ p.micro <- ggplot(data = d, aes(x = Micro, y = mu/exp(Area))) + #, group = SAMPL
   #              formula = y~poly(x,2), 
   #              geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=0.5) +
-  geom_point(data = dat, aes(x = Micro, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  geom_point(data = dat.plot, aes(x = Micro, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -406,7 +454,7 @@ p.micro
 
 #Temp Effects plot
 #needs fixing
-ggplot(data = d, aes(x = Temp, y = mu/exp(Area))) + #, group = SAMPLE
+ggplot(data = d, aes(x = Temp.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "grey") + #posterior data
   # stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=1, 
@@ -415,7 +463,7 @@ ggplot(data = d, aes(x = Temp, y = mu/exp(Area))) + #, group = SAMPLE
                #formula = y~poly(x,2),
                geom="line", aes(group = SAMPLE),
                alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat, aes(x = Temp, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  geom_point(data = dat.plot, aes(x = Temp.unscaled, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -424,13 +472,13 @@ ggplot(data = d, aes(x = Temp, y = mu/exp(Area))) + #, group = SAMPLE
 
 #Temp_2 Effects plot
 
-p.temp2 <- ggplot(data = d, aes(x = Temp_2, y = mu/exp(Area))) + #, group = SAMPLE
+p.temp2 <- ggplot(data = d, aes(x = Temp.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "grey") + #posterior data
   stat_smooth (data = d, method = "lm",
                formula = y~poly(x,2),
                geom="line", aes(group = SAMPLE),
                alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat, aes(x = Temp_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  geom_point(data = dat.plot, aes(x = Temp.unscaled, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -474,29 +522,7 @@ fit %>%
   ggplot(aes(y = Zone, x = a_Goby, xmin = .lower, xmax = .upper)) +
   geom_pointinterval()
 
-# plot RE with stats, takes a long time.
-fit %>%
-  spread_draws(a_Goby[Zone]) %>%
-  ggplot(aes(y = Zone, x = a_Goby)) +
-  stat_eye()
-beepr::beep()
 
-
-#effects plot example
-mtcars_clean %>%
-  group_by(cyl) %>%
-  data_grid(hp = seq_range(hp, n = 364)) %>%
-  add_predicted_draws(m_mpg) %>%
-  ggplot(aes(x = hp, y = mpg, color = cyl, fill = cyl)) +
-  stat_lineribbon(aes(y = .prediction), .width = c(.95, .80, .50), alpha = 1/4) +
-  geom_point(data = mtcars_clean) +
-  scale_fill_brewer(palette = "Set2") +
-  scale_color_brewer(palette = "Dark2")
-
-#diagnostic plots
-plot(fit)
-plot(fit, plotfun = "trace", pars = c("beta_BreachDays"), inc_warmup = TRUE)
-plot(fit, plotfun = "rhat") + ggtitle("Example of adding title to plot")
 
 
 

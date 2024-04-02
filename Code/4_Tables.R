@@ -1,7 +1,6 @@
 #tables
 
 
-
 ####summary data table
 
 names(dat.temp)
@@ -36,3 +35,48 @@ SUMMARY_TABLE <-t(SUMMARY_TABLE)
 #  causal coefficients
 
 #model statistics table
+
+#estimated density at beginning, middle and end of time series.
+#data from 3_plotting
+
+mean(dat$Goby)
+dat$Area
+mean(exp(dat$Area))
+mean(dat$Goby) / mean(exp(dat$Area))
+
+unique(dat$Year)
+
+density_mean <- d %>% 
+  group_by(Year_int) %>%
+  summarize(MEAN = mean(mu/exp(Area)))
+
+density_LOW <- d %>% 
+  group_by(Year_int) %>%
+  summarize(LOW = mean(mu/exp(Area)))
+
+density_HI <- d %>% 
+  group_by(Year_int) %>%
+  summarize(LOW = mean(mu/exp(Area)))
+
+library(meantables)
+
+MEAN_TABLE <- d %>%
+  mutate(GobyDens = mu/exp(Area)) %>%
+  group_by(Year_int) %>%
+  mean_table(GobyDens)
+
+MEAN_TABLE$year <- MEAN_TABLE$group_cat+1995
+
+d %>%
+  ggplot(aes(Year_int+1995, mu/exp(Area),color = as.factor(Zone))) +
+  geom_jitter(alpha = 0.1) +
+  #geom_pointrange(aes(ymin=mean-sd, ymax=mean+sd), color = "blue") +
+  ylab("Goby Density") +
+  geom_smooth (method = "lm", se=TRUE,
+               formula = y~poly(x,2),
+               alpha=0., linewidth=0.75) +
+  theme_few(base_size = 16)
+
+
+
+
