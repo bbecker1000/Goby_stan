@@ -212,9 +212,10 @@ d <- d.all.post %>% filter(between(SAMPLE, 1950 , 2001) )
 
 #Breach using the raw breach data as x variable.
 p.breach <-  ggplot(data = d, aes(x = Breach.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
-  geom_point(data = dat.plot, aes(x = Breach.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
-             color = "blue") + #raw data
   geom_point(alpha = 0.05, color = "grey") + #posterior data
+    geom_point(data = dat.plot, aes(x = Breach.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
+             color = "blue") + #raw data
+
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, linewidth=0.75, color = "red") +
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
@@ -236,6 +237,7 @@ p.year <-  ggplot(data = d, aes(x = Year_int+1994, y = mu/exp(Area))) + #, group
     ylim(0,200) + 
     ylab(" ") +
     xlab("Year") +
+    scale_x_continuous(breaks = c(2000, 2010, 2020 )) +
     facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))  
 p.year
   
@@ -244,9 +246,10 @@ p.year
 
 #Year^2 effects plot
 p.year2 <-  ggplot(data = d, aes(x = Year_int+1995, y = mu/exp(Area))) + #, group = SAMPLE
-  geom_point(data = dat.plot, aes(x = Year_int+1995, y = Goby/exp(Area)), alpha = 0.25, 
+  geom_point(alpha = 0.05, color = "gray") + #posterior data
+    geom_point(data = dat.plot, aes(x = Year_int+1995, y = Goby/exp(Area)), alpha = 0.25, 
              color = "blue") + #raw data
-    geom_point(alpha = 0.05, color = "gray") + #posterior data
+
     stat_smooth (data = d, method = "lm", 
                  formula = y~poly(x,2),
                  geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
@@ -254,14 +257,15 @@ p.year2 <-  ggplot(data = d, aes(x = Year_int+1995, y = mu/exp(Area))) + #, grou
     ylim(0,200) + 
     ylab(" ") +
     xlab("Year") +
+    scale_x_continuous(breaks = c(2000, 2020)) +
     facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs)) 
 p.year2
 
 #Goby_lag effects plot
 p.Goby_lag <-  ggplot(data = d, aes(x = Goby_lag, y = mu/exp(Area))) + #, group = SAMPLE
-  geom_point(data = dat.plot, aes(x = Goby_lag, y = Goby/exp(Area)), alpha = 0.25, 
-             color = "blue") + #raw data
   geom_point(alpha = 0.05, color = "gray") + #posterior data
+    geom_point(data = dat.plot, aes(x = Goby_lag, y = Goby/exp(Area)), alpha = 0.25, 
+             color = "blue") + #raw data
   stat_smooth (data = d, method = "lm", 
                geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
