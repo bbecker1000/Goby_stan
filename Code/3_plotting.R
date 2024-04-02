@@ -212,11 +212,11 @@ d <- d.all.post %>% filter(between(SAMPLE, 1950 , 2001) )
 
 #Breach using the raw breach data as x variable.
 p.breach <-  ggplot(data = d, aes(x = Breach.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
+  geom_point(data = dat.plot, aes(x = Breach.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
+             color = "blue") + #raw data
   geom_point(alpha = 0.05, color = "grey") + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, linewidth=0.75, color = "red") +
-  geom_point(data = dat.plot, aes(x = Breach.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
-             color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -244,12 +244,12 @@ p.year
 
 #Year^2 effects plot
 p.year2 <-  ggplot(data = d, aes(x = Year_int+1995, y = mu/exp(Area))) + #, group = SAMPLE
+  geom_point(data = dat.plot, aes(x = Year_int+1995, y = Goby/exp(Area)), alpha = 0.25, 
+             color = "blue") + #raw data
     geom_point(alpha = 0.05, color = "gray") + #posterior data
     stat_smooth (data = d, method = "lm", 
                  formula = y~poly(x,2),
                  geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
-    geom_point(data = dat.plot, aes(x = Year_int+1995, y = Goby/exp(Area)), alpha = 0.25, 
-               color = "blue") + #raw data
     #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
     ylim(0,200) + 
     ylab(" ") +
@@ -259,12 +259,11 @@ p.year2
 
 #Goby_lag effects plot
 p.Goby_lag <-  ggplot(data = d, aes(x = Goby_lag, y = mu/exp(Area))) + #, group = SAMPLE
-  geom_point(alpha = 0.05, color = "gray") + #posterior data
-  
-  stat_smooth (data = d, method = "lm", 
-               geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
   geom_point(data = dat.plot, aes(x = Goby_lag, y = Goby/exp(Area)), alpha = 0.25, 
              color = "blue") + #raw data
+  geom_point(alpha = 0.05, color = "gray") + #posterior data
+  stat_smooth (data = d, method = "lm", 
+               geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -276,11 +275,11 @@ p.Goby_lag
 #plotting vs breach with a poly to show the breach^2 model
 # squared the raw value before centering in model 
 p.breach2 <- ggplot(data = d, aes(x = BreachDays_2, y = mu/exp(Area))) + #, group = SAMPLE
+  geom_point(data = dat.plot, aes(x = BreachDays_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   geom_point(alpha = 0.05, color = "gray") + #posterior data
   stat_smooth (data = d, method = "lm", 
                formula = y~poly(x,2),
                geom="line", aes(group = SAMPLE), alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat.plot, aes(x = BreachDays_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -295,13 +294,11 @@ p.breach2
 
 p.DO <-  ggplot(data = d, aes(x = DO.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "gray") + #posterior data
-  
+  geom_point(data = dat.plot, aes(x = DO.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
+             color = "blue") + #raw data
   stat_smooth (data = d, method = "lm", 
                geom="line", aes(group = SAMPLE), alpha=0.05, 
                linewidth=0.75, color = "red") +
-  geom_point(data = dat.plot, aes(x = DO.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
-             color = "blue") + #raw data
-  #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
   xlab("DO") +
@@ -314,10 +311,10 @@ p.DO
 #Wind effects plot 
 # no effect on goby, only has a sig coefficient in model
 p.wind <- ggplot(data = d, aes(x = Wind, y = mu/exp(Area))) + #, group = SAMPLE
+  geom_point(data = dat.plot, aes(x = Wind, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   geom_point(alpha = 0.05, color = "blue") + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat.plot, aes(x = Wind, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -357,6 +354,7 @@ p.substrate
 
 #SAV Effects plot
 p.sav <- ggplot(data = d, aes(x = SAV.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
+  geom_jitter(data = dat.plot, aes(x = SAV.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
   geom_jitter(alpha = 0.05, color = "grey", width = 0.1) + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.2, size=1, 
@@ -365,7 +363,7 @@ p.sav <- ggplot(data = d, aes(x = SAV.unscaled, y = mu/exp(Area))) + #, group = 
   #              formula = y~poly(x,2), 
   #              geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=0.75, color = "red") +
-  geom_jitter(data = dat.plot, aes(x = SAV.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
+ 
               color = "blue", width = 0.1) + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
@@ -375,7 +373,8 @@ p.sav <- ggplot(data = d, aes(x = SAV.unscaled, y = mu/exp(Area))) + #, group = 
 p.sav
 
 #SAV Effects plot
-p.sav2 <- ggplot(data = d, aes(x = SAV_2, y = mu/exp(Area))) + #, group = SAMPLE
+p.sav2 <- ggplot(data = d, aes(x = SAV_2, y = mu/exp(Area))) + 
+  geom_point(data = dat.plot, aes(x = SAV_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "grey") + #posterior data
   # stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
   #              alpha=0.2, size=1, 
@@ -383,8 +382,7 @@ p.sav2 <- ggplot(data = d, aes(x = SAV_2, y = mu/exp(Area))) + #, group = SAMPLE
   stat_smooth (data = d, method = "lm", 
                formula = y~poly(x,2), 
                geom="line", aes(group = SAMPLE), 
-               alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat.plot, aes(x = SAV_2, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+               alpha=0.05, size=0.75, color = "red") +#raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -437,6 +435,7 @@ p.SB
 #Micro Effects plot
 p.micro <- ggplot(data = d, aes(x = Micro, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "gray") + #posterior data
+  geom_point(data = dat.plot, aes(x = Micro, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.05, size=0.75, 
                color = "red") +
@@ -444,7 +443,7 @@ p.micro <- ggplot(data = d, aes(x = Micro, y = mu/exp(Area))) + #, group = SAMPL
   #              formula = y~poly(x,2), 
   #              geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=0.5) +
-  geom_point(data = dat.plot, aes(x = Micro, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -459,11 +458,12 @@ ggplot(data = d, aes(x = Temp.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
   # stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=1, 
   #              color = "blue") +
+  geom_point(data = dat.plot, aes(x = Temp.unscaled, y = Goby/exp(Area)), alpha = 0.25, color = "blue") +
   stat_smooth (data = d, method = "lm",
                #formula = y~poly(x,2),
                geom="line", aes(group = SAMPLE),
                alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat.plot, aes(x = Temp.unscaled, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -474,11 +474,12 @@ ggplot(data = d, aes(x = Temp.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
 
 p.temp2 <- ggplot(data = d, aes(x = Temp.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
   geom_point(alpha = 0.05, color = "grey") + #posterior data
+  geom_point(data = dat.plot, aes(x = Temp.unscaled, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + 
   stat_smooth (data = d, method = "lm",
                formula = y~poly(x,2),
                geom="line", aes(group = SAMPLE),
                alpha=0.05, size=0.75, color = "red") +
-  geom_point(data = dat.plot, aes(x = Temp.unscaled, y = Goby/exp(Area)), alpha = 0.25, color = "blue") + #raw data
+  #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
