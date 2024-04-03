@@ -257,6 +257,7 @@ p.year2 <-  ggplot(data = d, aes(x = Year_int+1995, y = mu/exp(Area))) + #, grou
     ylim(0,200) + 
     ylab(" ") +
     xlab("Year") +
+    guides(x = guide_axis(minor.ticks = TRUE)) +
     scale_x_continuous(breaks = c(2000, 2020)) +
     facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs)) 
 p.year2
@@ -271,7 +272,7 @@ p.Goby_lag <-  ggplot(data = d, aes(x = Goby_lag, y = mu/exp(Area))) + #, group 
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
-  xlab("Goby Density Year-1") +
+  xlab("Goby Density(t-1)") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))  
 p.Goby_lag
 
