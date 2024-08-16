@@ -35,6 +35,7 @@ set.seed(123)
 
 DAG_GOBY <- dagitty("dag{ 
   Year -> GOBY ;
+  Breach -> GOBY ; 
   DO_Temp -> GOBY ;
   Stickleback -> GOBY ;
   Sculpin -> GOBY ;
@@ -76,17 +77,17 @@ impliedConditionalIndependencies(DAG_GOBY)
 
 # to pretty up the plot 
 # not done yet
-coordinates(DAG_GOBY) <- list(x=c(Year=1,DO_Temp=3,
+coordinates(DAG_GOBY) <- list(x=c(Year=2,DO_Temp=3,
                                   Stickleback=3,Sculpin=4,
-                                  Rain=1,Microsporidia=1, 
-                                  Substrate=3, SAV=5, 
-                                  Breach=3, Wind=5, 
-                                  Zone= 5, GOBY=1),
+                                  Rain=3,Microsporidia=3, 
+                                  Substrate=3, SAV=4, 
+                                  Breach=2, Wind=4, 
+                                  Zone= 4, GOBY=2),
                               y=c(Year=3,DO_Temp=-3,
                                   Stickleback=-1,Sculpin=1,
-                                  Rain=-5,Microsporidia=-3, 
-                                  Substrate=3, SAV=-1, 
-                                  Breach=-5, Wind=-5, 
+                                  Rain=-5,Microsporidia=3, 
+                                  Substrate=1.5, SAV=-1, 
+                                  Breach=-3, Wind=-5, 
                                   Zone=-3, GOBY=0))
 plot(DAG_GOBY)
 

@@ -100,12 +100,12 @@ Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS <-  ulam(
       beta_Wind
       # beta_ZW
       )                 ~ normal( 0 , 0.5 ),      # uninformed
-      beta_Temp_2       ~ normal(-0.10 , 0.25),   # goldilocks 
+      beta_Temp_2       ~ normal( 0.10 , 0.25),   # goldilocks 
       beta_Micro        ~ normal( 0.25 , 0.25 ),  # more fish = more micro
       beta_Rain         ~ normal( 0.25 , 0.25 ),  # more rain = more goby
       beta_SC_count     ~ normal(-0.10 , 0.25 ),  # sculpins eat goby larvae
       beta_SAV          ~ normal( 0.00 , 0.25 ),  # goldilocks 
-      beta_SAV_2        ~ normal(-0.10 , 0.25 ),  # goldilocks 
+      beta_SAV_2        ~ normal( 0.10 , 0.25 ),  # goldilocks 
       beta_DO           ~ normal( 0.25 , 0.25 ),  # more DO good
       beta_BreachDays   ~ normal( 0.25 , 0.25 ),  # more breach good
       beta_BreachDays_2 ~ normal( 0.10 , 0.25 ),  # goldilocks
@@ -210,10 +210,10 @@ Goby.m2.year.DAG.SC.SB_logistic.BreachDays.direct.RS.lag <-  ulam(
       # slope of wind piling up algae
       Area, #offset already logged
     
-    #Zone RE model
+    #Zone RE model with regularizing priors
     a_Goby[Zone] ~ dnorm(mu_Zone, tau_Zone), #the "1" adds varying slope.
-    mu_Zone ~ dnorm(0, 0.5),  # was 0,5
-    tau_Zone ~ dexp(1),
+    mu_Zone ~ dnorm(0, 0.5),  # Hyperprior / hyperparameter
+    tau_Zone ~ dexp(1),       # Hyperprior / hyperparameter
     
     #DO model
     DO ~ normal( DO_nu , tau ),
@@ -265,18 +265,18 @@ Goby.m2.year.DAG.SC.SB_logistic.BreachDays.direct.RS.lag <-  ulam(
       beta_Temp, 
       beta_Wind
       # beta_ZW
-    )                 ~ normal( 0 , 0.5 ),      # uninformed
-    beta_Temp_2       ~ normal(-0.10 , 0.25),   # goldilocks 
+    )                 ~ normal( 0 , 0.5 ),      # regularizing
+    beta_Temp_2       ~ normal( 0.10 , 0.25),   # goldilocks 
     beta_Micro        ~ normal( 0.25 , 0.25 ),  # more fish = more micro
     beta_Rain         ~ normal( 0.25 , 0.25 ),  # more rain = more goby
     beta_SC_count     ~ normal(-0.10 , 0.25 ),  # sculpins eat goby larvae
     beta_SAV          ~ normal( 0.00 , 0.25 ),  # goldilocks 
-    beta_SAV_2        ~ normal(-0.10 , 0.25 ),  # goldilocks 
+    beta_SAV_2        ~ normal( 0.10 , 0.25 ),  # goldilocks 
     beta_DO           ~ normal( 0.25 , 0.25 ),  # more DO good
     beta_BreachDays   ~ normal( 0.25 , 0.25 ),  # more breach good
     beta_BreachDays_2 ~ normal( 0.10 , 0.25 ),  # goldilocks
     beta_Substrate    ~ normal( 0.25 , 0.25 ),  # coarser habitat better
-    beta_Goby_lag     ~ normal( 0.25 , 0.25 ),  #added 2024-03-24
+    beta_Goby_lag     ~ normal( 0.25 , 0.25 ),  # added 2024-03-24
     
     tau ~ exponential(1),
     #phi ~ dexp(1),
@@ -286,7 +286,7 @@ Goby.m2.year.DAG.SC.SB_logistic.BreachDays.direct.RS.lag <-  ulam(
     #c(SC_phi, SB_phi) ~ dexp(1)  # use dexp(100) if not neg.bin
   ), 
   data=dat , chains=3 , cores=parallel::detectCores() , iter=4000 , #high r-hat with 3k iter
-  cmdstan=FALSE # FALSE to get stanfit object
+  cmdstan=TRUE # FALSE to get stanfit object
 )
 
 beepr::beep(0)

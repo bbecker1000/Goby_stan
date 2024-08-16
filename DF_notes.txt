@@ -77,4 +77,13 @@ so look at different slopes by zone for wind     DONE WITH INTERACTION TERM 2024
 23. instead of ar() (mcelreath p. 542), use density of TWG in year t-1 as a mechanistic estimate of larval potential.  - DONE
 
 
+2024-04-20
+Thuy-Tien Meeting
+
+24. Proposal
+ - BB finish methods, results, tables and figures - By May 15
+ - TTB intro, discussion, DAG, references, format - Summer 2024
+
+
+
 

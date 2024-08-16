@@ -63,6 +63,21 @@ chain.data %>%
 
 
 
+#acf plots
+par(mfrow=c(3,4))
+
+acf(chain.data$beta_Substrate)
+acf(chain.data$beta_BreachDays)
+acf(chain.data$beta_SB_count)
+acf(chain.data$beta_SC_count)
+acf(chain.data$beta_Goby_lag)
+acf(chain.data$beta_Micro)
+acf(chain.data$beta_DO)
+acf(chain.data$beta_Temp)
+acf(chain.data$beta_SAV)
+acf(chain.data$beta_Wind)
+
+par(mfrow=c(1,1))
 
 #Pairs plots
 cowplot::plot_grid(
