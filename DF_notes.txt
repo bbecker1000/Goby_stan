@@ -85,7 +85,10 @@ Thuy-Tien Meeting
  - TTB intro, discussion, DAG, references, format - Summer 2024
  
 25. NOTE THAT FINAL MODEL USED IS: 
-Goby.m2.year.DAG.SC.SB_logistic.BreachDays.direct.RS.lag
+A. Goby.m2.year.DAG.SC.SB_logistic.BreachDays.direct.RS.lag
+B. make sure run logistic scripts before plotting
+C. NEED to fix SAV plot layering and colors
+
 
 
 

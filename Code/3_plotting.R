@@ -352,7 +352,8 @@ p.substrate <- ggplot(data = d, aes(x = as.factor(Substrate), y = mu/exp(Area)))
     geom_jitter(data = dat.plot, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Zone), 
                 alpha = 0.25, color = "blue", width = 0.1) + #raw data
     #geom_boxplot(data = dat.plot, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Substrate), alpha = 0.25) + #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
-    ylim(0,200) + 
+  stat_summary(geom = "point", fun.y = "mean", col = "red", size = 2, shape = "square", alpha = 0.8) + 
+  ylim(0,200) + 
     ylab("Goby Density") +
     xlab("Substrate") +
     facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))  
@@ -412,7 +413,7 @@ p.SC <- ggplot(data = d, aes(x = as.factor(SC_count), y = mu/exp(Area))) + #, gr
   geom_jitter(data = dat.plot, aes(x = SC_count+1, y = Goby/exp(Area)), 
              alpha = 0.25, color = "blue", width = 0.1) + #raw data
   #geom_boxplot() + 
-  stat_summary(geom = "point", fun.y = "mean", col = "red", size = 2, shape = "square", alpha = 0.5) + 
+  stat_summary(geom = "point", fun.y = "mean", col = "red", size = 2, shape = "square", alpha = 0.8) + 
   ylim(0,200) + 
   ylab(" ") +
   xlab("Sculpin Presence") +
@@ -432,7 +433,7 @@ p.SB <- ggplot(data = d, aes(x = as.factor(SB_count), y = mu/exp(Area))) + #, gr
   #              alpha=0.05, size=0.5) +
   geom_jitter(data = dat.plot, aes(x = SB_count+1, y = Goby/exp(Area)), 
               alpha = 0.25, color = "blue", width = 0.1) + #raw data
-  stat_summary(geom = "point", fun.y = "mean", col = "red", size = 2, shape = "square", alpha = 0.5) +
+  stat_summary(geom = "point", fun.y = "mean", col = "red", size = 2, shape = "square", alpha = 0.8) +
   ylim(0,200) + 
   ylab(" ") +
   xlab("Stickleback Presence") +
