@@ -83,6 +83,9 @@ Thuy-Tien Meeting
 24. Proposal
  - BB finish methods, results, tables and figures - By May 15
  - TTB intro, discussion, DAG, references, format - Summer 2024
+ 
+25. NOTE THAT FINAL MODEL USED IS: 
+Goby.m2.year.DAG.SC.SB_logistic.BreachDays.direct.RS.lag
 
 
 

@@ -208,6 +208,7 @@ d.all.post$Temp_2 <- rep(dat$Temp_2, times = 3000)
 #Subset data for the fit lines
 # grab random 100 samples near middle of the chain
 d <- d.all.post %>% filter(between(SAMPLE, 1950 , 2001) )
+d$SB_count
 
 
 #Breach using the raw breach data as x variable.
@@ -359,7 +360,7 @@ p.substrate
 
 #SAV Effects plot
 p.sav <- ggplot(data = d, aes(x = SAV.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
-  geom_jitter(data = dat.plot, aes(x = SAV.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
+  geom_jitter(data = dat.plot, aes(x = SAV.unscaled, y = Goby/exp(Area)), alpha = 0.25) +
   geom_jitter(alpha = 0.05, color = "grey", width = 0.1) + #posterior data
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
                alpha=0.2, size=1, 
@@ -369,7 +370,7 @@ p.sav <- ggplot(data = d, aes(x = SAV.unscaled, y = mu/exp(Area))) + #, group = 
   #              geom="line", aes(group = SAMPLE), 
   #              alpha=0.05, size=0.75, color = "red") +
  
-              color = "blue", width = 0.1) + #raw data
+   #           color = "blue", width = 0.1) + #raw data
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -410,6 +411,8 @@ p.SC <- ggplot(data = d, aes(x = as.factor(SC_count), y = mu/exp(Area))) + #, gr
   #              alpha=0.05, size=0.5) +
   geom_jitter(data = dat.plot, aes(x = SC_count+1, y = Goby/exp(Area)), 
              alpha = 0.25, color = "blue", width = 0.1) + #raw data
+  #geom_boxplot() + 
+  stat_summary(geom = "point", fun.y = "mean", col = "red", size = 2, shape = "square", alpha = 0.5) + 
   ylim(0,200) + 
   ylab(" ") +
   xlab("Sculpin Presence") +
@@ -417,6 +420,7 @@ p.SC <- ggplot(data = d, aes(x = as.factor(SC_count), y = mu/exp(Area))) + #, gr
 p.SC
 
 #make sure run binary code before logistic model !
+# file 2_Full Luxury, line ~177
 p.SB <- ggplot(data = d, aes(x = as.factor(SB_count), y = mu/exp(Area))) + #, group = SAMPLE
   geom_jitter(alpha = 0.05, color = "gray", width = 0.1) + #posterior data
   #stat_smooth (data = d, method = "loess", geom="line", aes(group = SAMPLE), 
@@ -428,6 +432,7 @@ p.SB <- ggplot(data = d, aes(x = as.factor(SB_count), y = mu/exp(Area))) + #, gr
   #              alpha=0.05, size=0.5) +
   geom_jitter(data = dat.plot, aes(x = SB_count+1, y = Goby/exp(Area)), 
               alpha = 0.25, color = "blue", width = 0.1) + #raw data
+  stat_summary(geom = "point", fun.y = "mean", col = "red", size = 2, shape = "square", alpha = 0.5) +
   ylim(0,200) + 
   ylab(" ") +
   xlab("Stickleback Presence") +
@@ -509,11 +514,11 @@ p.all.effects <- cowplot::plot_grid(p.year2,
                                     p.DO, 
                                     p.rain, 
                             
-                           ncol=4, labels="auto", scale = 0.9, 
+                           ncol=3, labels="auto", scale = 0.9, 
                            vjust = 3, hjust = -2.2
                            )
 p.all.effects
-ggsave("Output/p.all.effects.lag.jpg", width = 35, height = 20, units = "cm")
+ggsave("Output/p.all.effects.lag.jpg", width = 35, height = 30, units = "cm")
 
 
 #random effects groups

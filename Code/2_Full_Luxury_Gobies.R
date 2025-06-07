@@ -166,7 +166,7 @@ plot(fit, depth = 2)
 
 
 
-## SC and SB fist from nb to logistic 2024-03-26
+## SC and SB dist from nb to logistic 2024-03-26
 # the long tails on the SC and SB counts are hard for dgampois and pois to model (mass too high)
 # so cap SC counts at 80 and SB counts at 500  
 # still has mean too high around 20 for neg bin and 15 for pois
