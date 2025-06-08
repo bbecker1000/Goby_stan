@@ -354,17 +354,18 @@ p.substrate <- ggplot(data = d, aes(x = as.factor(Substrate), y = mu/exp(Area)))
     #geom_boxplot(data = dat.plot, aes(x = as.factor(Substrate), y = Goby/exp(Area), group = Substrate), alpha = 0.25) + #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   stat_summary(geom = "point", fun.y = "mean", col = "red", size = 2, shape = "square", alpha = 0.8) + 
   ylim(0,200) + 
-    ylab("Goby Density") +
+    ylab(" ") +
     xlab("Substrate") +
     facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))  
 p.substrate
 
 #SAV Effects plot
 p.sav <- ggplot(data = d, aes(x = SAV.unscaled, y = mu/exp(Area))) + #, group = SAMPLE
-  geom_jitter(data = dat.plot, aes(x = SAV.unscaled, y = Goby/exp(Area)), alpha = 0.25) +
-  geom_jitter(alpha = 0.05, color = "grey", width = 0.1) + #posterior data
+  geom_jitter(alpha = 0.05, color = "grey", width = 0.05) + #posterior data
+  geom_jitter(data = dat.plot, aes(x = SAV.unscaled, y = Goby/exp(Area)), alpha = 0.25, 
+              color = "blue", width = 0.05) +
   stat_smooth (data = d, method = "lm", geom="line", aes(group = SAMPLE), 
-               alpha=0.2, size=1, 
+               alpha=0.05, size=1, 
                color = "red") +
   # stat_smooth (data = d, method = "lm", 
   #              formula = y~poly(x,2), 
@@ -457,7 +458,8 @@ p.micro <- ggplot(data = d, aes(x = Micro, y = mu/exp(Area))) + #, group = SAMPL
   
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
-  ylab(" ") +
+ # ylab("Goby Density (n/m^2") +
+  ylab(expression(paste("Goby Density (", m^2, ")"))) + 
   xlab("Microsporidia Count") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.micro

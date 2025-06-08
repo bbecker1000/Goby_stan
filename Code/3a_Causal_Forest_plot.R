@@ -179,7 +179,7 @@ ForestWithPriors %>% # plot.posteriors.wide %>%
   ) %>%
   ggplot(aes(x = names, y = median, color = effect)) +
   #geom_point(effect = c("red", "black", "blue"))) +
-<<<<<<< HEAD
+
   geom_pointrange(aes(ymin = lower, ymax = upper),position = position_nudge(x = 0.1)) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_pointrange(data = ForestWithPriors, 
@@ -188,27 +188,27 @@ ForestWithPriors %>% # plot.posteriors.wide %>%
                   color = "blue", shape = "square", alpha = 0.2, 
                       show.legend = TRUE,
                     position = position_nudge(x = -0.1)) +
-=======
-  geom_pointrange(aes(ymin = lower, ymax = upper)) +
-  geom_hline(yintercept = 0, lty = 2) +
-  geom_pointrange(data = ForestWithPriors, 
-                  aes(x = names, y = prior, 
-                      ymin = prior_lo, ymax = prior_hi), color = "lightblue") +
->>>>>>> 11686e427f227639ee4fa8a37ca4d4dfe9f6c069
+
+  # geom_pointrange(aes(ymin = lower, ymax = upper)) +
+  # geom_hline(yintercept = 0, lty = 2) +
+  # geom_pointrange(data = ForestWithPriors, 
+  #                 aes(x = names, y = prior, 
+  #                     ymin = prior_lo, ymax = prior_hi), color = "lightblue") +
+
   xlab("Causal Path") + 
   ylab("Causal Effect on Goby Density") +
   scale_color_manual(breaks = c("negative", "neutral", "positive"),
                      values=c("red", "darkgray", "green3")) + 
   coord_flip() +
   scale_x_discrete(limits=rev) +
-<<<<<<< HEAD
+
   theme_few(base_size = 16) + 
   theme(legend.position = c(.85, .7))
 ggsave("Output/forest.plot.Yearlag.priors.png", width = 20, height = 30, units = "cm")
-=======
+
   theme_few(base_size = 16)
 
->>>>>>> 11686e427f227639ee4fa8a37ca4d4dfe9f6c069
+
 
 
 
