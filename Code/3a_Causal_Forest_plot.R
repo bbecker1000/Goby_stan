@@ -173,6 +173,23 @@ head(ForestWithPriors)
 
 #plot with priors
 
+#(fix priors in excel file)
+ForestWithPriors[29,6] <- -0.1
+ForestWithPriors[30,6] <- -0.1
+ForestWithPriors[34,6] <- -0.1
+
+ForestWithPriors[29,8] <- -0.35
+ForestWithPriors[30,8] <- -0.35
+ForestWithPriors[34,8] <- -0.35
+
+ForestWithPriors[29,9] <- 0.15
+ForestWithPriors[30,9] <- 0.15
+ForestWithPriors[34,9] <- 0.15
+#remove two rows of NAs
+ForestWithPriors <- ForestWithPriors[-c(36:37),]
+
+
+
 ForestWithPriors %>% # plot.posteriors.wide %>%
   mutate(
     names = fct_reorder(names, -median)
@@ -185,8 +202,8 @@ ForestWithPriors %>% # plot.posteriors.wide %>%
   geom_pointrange(data = ForestWithPriors, 
                   aes(x = names, y = prior, 
                       ymin = prior_lo, ymax = prior_hi), 
-                  color = "blue", shape = "square", alpha = 0.2, 
-                      show.legend = TRUE,
+                  color = "blue", shape = "square", alpha = 0.3, 
+                      show.legend = FALSE,
                     position = position_nudge(x = -0.1)) +
 
   # geom_pointrange(aes(ymin = lower, ymax = upper)) +
@@ -197,13 +214,16 @@ ForestWithPriors %>% # plot.posteriors.wide %>%
 
   xlab("Causal Path") + 
   ylab("Causal Effect on Goby Density") +
+  labs(color='Posterior') +
   scale_color_manual(breaks = c("negative", "neutral", "positive"),
                      values=c("red", "darkgray", "green3")) + 
   coord_flip() +
   scale_x_discrete(limits=rev) +
-
+  geom_point(aes(x = 14, y = 1, prior = 0.1), color = "lightblue", 
+             shape = "square", size = 2.5) +
+  annotate("text", x = 15, y = 1.15, label = "Prior", size = 6) +
   theme_few(base_size = 16) + 
-  theme(legend.position = c(.85, .7))
+  theme(legend.position = c(.8, .6))
 ggsave("Output/forest.plot.Yearlag.priors.png", width = 20, height = 30, units = "cm")
 
   theme_few(base_size = 16)
