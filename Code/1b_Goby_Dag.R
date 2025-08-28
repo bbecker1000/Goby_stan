@@ -135,3 +135,4 @@ ggdag_adjustment_set(goby_dag, text_col = "black")
 library(dagitty)
 
 adjustmentSets(goby_dag)
+

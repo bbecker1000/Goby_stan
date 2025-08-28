@@ -2,8 +2,8 @@
 source("code/1_DataPrep.R")
 
 
-
-
+library(rethinking)
+library(cmdstanr)
 
 
 ##################
@@ -350,6 +350,7 @@ hist(dat$SB_count)
 
 
 #### lag model 2025-06-07
+#### make sure run lines 341-348 above to change to binary
 #### fixing the polynomial priors to change sign!!
 t0 <- Sys.time()
 
