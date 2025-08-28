@@ -455,7 +455,7 @@ Goby.m2.year.DAG.SC.SB_logistic.BreachDays.direct.RS.lag.2025_06_07 <-  ulam(
     #c(SC_phi, SB_phi) ~ dexp(1)  # use dexp(100) if not neg.bin
   ), 
   data=dat , chains=3 , cores=parallel::detectCores() , iter=4000 , #high r-hat with 3k iter
-  cmdstan=TRUE # FALSE to get stanfit object
+  cmdstan=FALSE # FALSE to get stanfit object
 )
 
 beepr::beep(0)
