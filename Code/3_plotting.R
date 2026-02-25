@@ -22,10 +22,12 @@ library(ggthemes)
 theme_set(theme_few())
 
 
+
 #rename model for plotting
 #fit <- Goby.m2.year.DAG.SC.SB_counts.BreachDays.direct.RS #m1 is stanfit
 
-names(as_tibble(link(fit)))
+
+names(as_tibble(link(fit))) #fit from running 2025 model in 2_Full_luxury...
 
 post <- as.data.frame(link(fit))
 #just get post-warmup values
@@ -287,7 +289,7 @@ p.breach2 <- ggplot(data = d, aes(x = BreachDays_2, y = mu/exp(Area))) + #, grou
   geom_point(alpha = 0.1, color = "gray") + #posterior data
   stat_smooth (data = d, method = "lm", 
                formula = y~poly(x,2),
-               geom="line", aes(group = SAMPLE), alpha=0.05, size=0.75, color = "red") +
+               geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
@@ -343,8 +345,10 @@ p.rain <- ggplot(data = d, aes(x = Rain.unscaled, y = mu/exp(Area))) + #, group 
   ylim(0,200) + 
   ylab(" ") +
   xlab("Annual Rainfall (cm)") +
-  facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
+  facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs)) 
 p.rain
+
+
 
 
 #substrate Effects plot
@@ -459,8 +463,9 @@ p.micro <- ggplot(data = d, aes(x = Micro, y = mu/exp(Area))) + #, group = SAMPL
   
   #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
+  ylab(" ") + 
  # ylab("Goby Density (n/m^2") +
-  ylab(expression(paste("Goby Density (", m^2, ")                   "))) + 
+  #ylab(expression(paste("Goby Density (", m^2, ")                   "))) + 
   xlab("Microsporidia Count (scaled)") +
   facet_wrap(.~Zone, labeller = labeller(Zone = Zone.labs))
 p.micro
@@ -526,22 +531,196 @@ p.all.effects <- cowplot::plot_grid(p.year2,
                            vjust = 3, hjust = -2.2
                            )
 p.all.effects
-ggsave("Output/p.all.effects.lag.jpg", width = 35, height = 35, units = "cm")
+
+library(cowplot)
+
+final_plot <- cowplot::ggdraw(p.all.effects) +
+  draw_label(ylab("Goby Density (m2)"), 
+             x = 0, y = 0.5, vjust = 1.2, angle = 90, size = 18, 
+             #fontface = "bold", 
+             color = "black")
+
+final_plot
+
+ggsave("Output/p.all.effects.lag_2025-09-13.jpg", width = 35, height = 35, units = "cm")
 
 
 
-#random effects groups
-fit %>%
-  spread_draws(a_Goby[Zone]) %>%
-  median_qi()
+#########_-------------
+#lets try some simple effects plots that were based on the 
 
-# plot RE.
-fit %>%
-  spread_draws(a_Goby[Zone]) %>%
-  median_qi() %>%
-  ggplot(aes(y = Zone, x = a_Goby, xmin = .lower, xmax = .upper)) +
-  geom_pointinterval()
+## all these need to be vetted !!
 
+##experiment adding rain --> breach from 
+Goby_Rain_Breach = (1 + exp(0.0599) * dat.plot$Rain.unscaled) / dat.plot$Area
+Goby_Rain_Breach.lo = (1 + exp(0.009) * dat.plot$Rain.unscaled) / dat.plot$Area
+Goby_Rain_Breach.hi = (1 + exp(0.112) * dat.plot$Rain.unscaled) / dat.plot$Area
+
+df <- data.frame(dat.plot$Rain.unscaled, dat.plot$Area, Goby_Rain_Breach, Goby_Rain_Breach.lo,
+                 Goby_Rain_Breach.hi)
+
+p.rain_breach_goby <- ggplot(data = df, aes(x = dat.plot.Rain.unscaled, group = 1)) + 
+     geom_smooth(se = F, aes(y = Goby_Rain_Breach, colour = "y1")) + 
+  geom_smooth(se = F, linetype = 2, aes(y = Goby_Rain_Breach.lo, colour = "y2")) +  
+  geom_smooth(se = F, linetype = 2, aes(y = Goby_Rain_Breach.hi, colour = "y2")) +  
+          scale_colour_manual("", breaks = c("y1", "y2"), values = c("blue", "gray")) +
+  theme_classic(base_size = 18) +
+  ylab(" ") +
+  xlab("Rainfall (cm)") +
+  ylim(0,20) +
+  theme(legend.position = "none") +
+  annotate(
+    "text", label = "Rainfall * Breaching effect \non Goby Density",
+    x = 20, y = 17, size = 6, colour = "red"
+  )
+p.rain_breach_goby
+
+#next do: 
+# Temp -> SB
+# value
+# <dbl>
+#   1 0.101
+# 2 0.173
+# 3 0.262
+
+Temp_SB = (-0.1 + exp(0.114) * dat.plot$Temp.unscaled) / dat.plot$Area
+Temp_SB.lo = (-0.1 + exp(0.057) * dat.plot$Temp.unscaled) / dat.plot$Area
+Temp_SB.hi = (-0.1 + exp(0.196) * dat.plot$Temp.unscaled) / dat.plot$Area
+
+df <- data.frame(dat.plot$Temp.unscaled, dat.plot$Area, Temp_SB, Temp_SB.lo,
+                 Temp_SB.hi)
+
+p.Temp_SB_goby <- ggplot(data = df, aes(x = dat.plot.Temp.unscaled, group = 1)) + 
+  geom_smooth(se = F, aes(y = Temp_SB, colour = "y1")) + 
+  geom_smooth(se = F, linetype = 2, aes(y = Temp_SB.lo, colour = "y2")) +  
+  geom_smooth(se = F, linetype = 2, aes(y = Temp_SB.hi, colour = "y2")) +  
+  scale_colour_manual("", breaks = c("y1", "y2"), values = c("blue", "gray")) +
+  theme_classic(base_size = 18) +
+  ylab(" ") +
+  xlab("Temperature (C)") +
+  ylim(0,20) +
+  theme(legend.position = "none") +
+  annotate(
+    "text", label = "Temperature * Stickleback Presence \neffect on Goby Density",
+    x = 17, y = 15, size = 6, colour = "red"
+  )
+p.Temp_SB_goby
+
+
+
+
+# 
+# 
+
+SAV_SB = (0.004 + exp(0.12) * dat.plot$SAV.unscaled) / dat.plot$Area
+SAV_SB.lo = (0.004 + exp(0.04) * dat.plot$SAV.unscaled) / dat.plot$Area
+SAV_SB.hi = (0.004 + exp(0.22) * dat.plot$SAV.unscaled) / dat.plot$Area
+
+df <- data.frame(dat.plot$SAV.unscaled, dat.plot$Area, SAV_SB, SAV_SB.lo,
+                 SAV_SB.hi)
+
+p.SAV_SB_goby <- ggplot(data = df, aes(x = dat.plot.SAV.unscaled, group = 1)) + 
+  geom_smooth(se = F, aes(y = SAV_SB, colour = "y1")) + 
+  geom_smooth(se = F, linetype = 2, aes(y = SAV_SB.lo, colour = "y2")) +  
+  geom_smooth(se = F, linetype = 2, aes(y = SAV_SB.hi, colour = "y2")) +  
+  scale_colour_manual("", breaks = c("y1", "y2"), values = c("blue", "gray")) +
+  theme_classic(base_size = 18) +
+  ylab(" ") +
+  xlab("SAV Quintile") +
+  ylim(0,20) +
+  theme(legend.position = "none") +
+  annotate(
+    "text", label = "SAV effect through \nStickleback presence",
+    x = 1, y = 15, size = 6, colour = "red"
+  )
+p.SAV_SB_goby
+
+
+
+
+# # SAV -> SC
+# 
+# value
+# <dbl>
+#   1 -0.158 
+# 2 -0.0775
+# 3 -0.0224
+
+SAV_SC = (0.004 + exp(-0.148) * dat.plot$SAV.unscaled) / dat.plot$Area
+SAV_SC.lo = (0.004 + exp(-0.256) * dat.plot$SAV.unscaled) / dat.plot$Area
+SAV_SC.hi = (0.004 + exp(-0.06) * dat.plot$SAV.unscaled) / dat.plot$Area
+
+df <- data.frame(dat.plot$SAV.unscaled, dat.plot$Area, SAV_SC, SAV_SC.lo,
+                 SAV_SC.hi)
+
+p.SAV_SC_goby <- ggplot(data = df, aes(x = dat.plot.SAV.unscaled, group = 1)) + 
+  geom_smooth(se = F, aes(y = SAV_SC, colour = "y1")) + 
+  geom_smooth(se = F, linetype = 2, aes(y = SAV_SC.lo, colour = "y2")) +  
+  geom_smooth(se = F, linetype = 2, aes(y = SAV_SC.hi, colour = "y2")) +  
+  scale_colour_manual("", breaks = c("y1", "y2"), values = c("blue", "gray")) +
+  theme_classic(base_size = 18) +
+  ylab(" ") +
+  xlab("SAV Quintile") +
+  ylim(0,20) +
+  theme(legend.position = "none") +
+  annotate(
+    "text", label = "SAV effect through \nSculpin presence",
+    x = 1, y = 15, size = 6, colour = "red"
+  )
+p.SAV_SC_goby
+
+
+
+# # Substrate -> SC
+# value
+# <dbl>
+#   1 -0.393
+# 2 -0.234
+# 3 -0.111
+
+Substrate_SC = (1 + exp(-0.204) * dat.plot$Substrate) / dat.plot$Area
+Substrate_SC.lo = (1 + exp(-0.378) * dat.plot$Substrate) / dat.plot$Area
+Substrate_SC.hi = (1 + exp(-0.06) * dat.plot$Substrate) / dat.plot$Area
+
+df <- data.frame(dat.plot$Substrate, dat.plot$Area, Substrate_SC, Substrate_SC.lo,
+                 Substrate_SC.hi)
+
+p.Substrate_SC_goby <- ggplot(data = df, aes(x = as.factor(dat.plot.Substrate), group = 1)) + 
+  geom_smooth(se = F, aes(y = Substrate_SC, colour = "y1")) + 
+  geom_smooth(se = F, linetype = 2, aes(y = Substrate_SC.lo, colour = "y2")) +  
+  geom_smooth(se = F, linetype = 2, aes(y = Substrate_SC.hi, colour = "y2")) +  
+  scale_colour_manual("", breaks = c("y1", "y2"), values = c("blue", "gray")) +
+  theme_classic(base_size = 18) +
+  ylab(" ") +
+  xlab("Substrate") +
+  ylim(0,20) +
+  theme(legend.position = "none") +
+  annotate(
+    "text", label = "Substrate effect through \nSculpin presence",
+    x = 1.25, y = 15, size = 6, colour = "red"
+  )
+p.Substrate_SC_goby
+
+
+p.causal.effects <- cowplot::plot_grid(p.rain_breach_goby,
+                                       p.Temp_SB_goby,
+                                       p.SAV_SB_goby,
+                                       p.SAV_SC_goby,
+                                       p.Substrate_SC_goby,
+                                    ncol=2, labels="AUTO", scale = 0.9, 
+                                    vjust = 3, hjust = -2.2
+)
+p.causal.effects
+
+final_plot_causal <- cowplot::ggdraw(p.causal.effects) +
+  draw_label(ylab("Goby Density (m2)"), 
+             x = 0, y = 0.5, vjust = 1.2, angle = 90, size = 18, 
+             #fontface = "bold", 
+             color = "black")
+
+final_plot_causal
+
+ggsave("Output/p.causal.effects_2025-10-08.jpg", width = 35, height = 35, units = "cm")
 
 
 

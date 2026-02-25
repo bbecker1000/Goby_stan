@@ -1,4 +1,4 @@
-﻿names,lower,median,upper,effect,prior,prior_ds,prior_lo,prior_hi
+names,lower,median,upper,effect,prior,prior_ds,prior_lo,prior_hi
 RAIN -> Breach -> DO,-5.31E-04,0.002919582,0.009663334,neutral,,,,
 RAIN -> Breach^2,-9.79E-02,0.003829176,0.106482352,neutral,,,,
 BREACH -> DO,-8.20E-04,0.004489096,0.014593088,neutral,,,,

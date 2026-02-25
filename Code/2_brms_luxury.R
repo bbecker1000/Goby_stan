@@ -32,56 +32,56 @@ goby.brm.test <- brm(
   backend = "cmdstanr"
 )
 
-summary(goby.brm.test)
+
 
 
 #the model from 2_full_luxiury_gobies_2025...
 
 # Goby model
 bf_Goby <- bf(Goby ~ 
-                Year + 
-                Year_2 +
-                SC_count +
-                SAV +
-                SB_count +
-                DO +
-                Micro +
-                BreachDays + 
-                BreachDays_2 + 
-                Substrate +
-                Wind +
-                Temp +
-                Temp_2 +
-                Goby_lag +
+                beta_Year * Year + 
+                beta_Year_2 * Year_2 +
+                beta_SC_count * SC_count +
+                beta_SAV * SAV +
+                beta_SB_count * SB_count +
+                beta_DO * DO +  
+                beta_Micro * Micro +
+                beta_BreachDays * BreachDays + 
+                beta_BreachDays_2 * BreachDays_2 + 
+                beta_Substrate * Substrate +
+                beta_Wind * Wind + 
+                beta_Temp * Temp +
+                beta_Temp_2 * Temp_2+
+                beta_Goby_lag * Goby_lag +
                 offset(Area) + #area already logged
-                (1 | Zone), 
-                family = negbinomial(link = "log", link_shape = "log"))
-
-#DO model
-bf_DO <- bf(DO ~ Temp + Wind + (1 | Zone))
-
-#Temp model
-bf_Temp <- bf(Temp ~ BreachDays + Wind + (1 | Zone))
-
-#SB model as logistic
-bf_SB_count <- bf(SB_count ~ DO + SAV + (1 | Zone), family = bernoulli(link = "logit"))
-
-#SC model as logistic
-bf_SC_count  <- bf(SC_count ~ Substrate + DO + SAV + (1 | Zone), family = bernoulli(link = "logit"))
-
-#BreachDays as normal
-bf_BreachDays <- bf(BreachDays ~ Rain)
-
-#SAV model
-bf_SAV <- bf(SAV ~ DO + Temp + (1 | Zone))
-
-multi_formula <- bf_Goby + bf_DO + bf_Temp + bf_SB_count + bf_SC_count + bf_BreachDays + bf_SAV
-
-get_prior(multi_formula, data = dat)
+                (1 | Zone)# allows to assign shared parameters
 
 
+get_prior(multi_formula_joint, data = dat)
+
+PRIORS <- c(
+  prior(normal(0, 2), nlpar = "beta_Year"),
+  prior(normal(0, 2), nlpar = "beta_Year_2"),
+  prior(normal(0, 2), nlpar = "beta_SC_count"),
+        prior(normal(0, 2), nlpar = "beta_SAV"),
+        prior(normal(0, 2), nlpar = "beta_SB_count"),
+              prior(normal(0, 2), nlpar = "beta_DO"),
+              prior(normal(0, 2), nlpar = "beta_Micro"),
+              prior(normal(0, 2), nlpar = "beta_BreachDays",
+                    prior(normal(0, 2), nlpar = "beta_BreachDays_2"),
+                    prior(normal(0, 2), nlpar = "beta_Substrate"),
+                    prior(normal(0, 2), nlpar = "beta_Wind",
+                          prior(normal(0, 2), nlpar = "beta_Temp"),
+                          prior(normal(0, 2), nlpar = "beta_Temp_2"),
+                          prior(normal(0, 2), nlpar = "beta_Goby_lag")
+                    )))
+
+              
+              
 goby.brm <- brm(
-  formula = multi_formula,
+  formula = multi_formula_joint,
+  family = FAMILY,
+  prior = PRIORS,
   data=dat, 
   chains=3, 
   cores=3,
@@ -91,6 +91,8 @@ goby.brm <- brm(
 
 summary(goby.brm)
 
+
+tidybayes::tidy_draws(goby.brm)
 
 # #fixed effects priors
 # c(a_Goby, a_BreachDays, a_DO, a_SB, a_SC, a_SAV, a_Temp,
@@ -122,7 +124,66 @@ summary(goby.brm)
 # ), 
 
 
+#
 
+#gemini and kurtz chap 14
 
+# Load the libraries and data
+library(brms)
+library(rethinking)
+data(WaffleDivorce)
+d <- WaffleDivorce
+
+# Standardize the variables for the model
+d$D_obs <- standardize(d$Divorce)
+d$M <- standardize(d$Marriage)
+d$A_obs <- standardize(d$MedianAgeMarriage)
+
+# Define the two submodels
+bf_divorce_unconstrained <- brms::bf(
+  D_obs ~ b_int_d + b_A * A_obs + b_M_D * M,
+  nl = TRUE
+)
+
+bf_marriage_age_unconstrained <- brms::bf(
+  A_obs | mi() ~ b_int_a + b_M_A * M,
+  nl = TRUE
+)
+
+# Set the priors
+priors_unconstrained <-
+  prior(normal(0, 0.2), nlpar = "b_int_d") +
+  prior(normal(0, 0.5), nlpar = "b_A") +
+  prior(normal(0, 0.5), nlpar = "b_M_D") + # <-- Prior for effect on Divorce
+  prior(normal(0, 0.2), nlpar = "b_int_a") +
+  prior(normal(0, 0.5), nlpar = "b_M_A")   # <-- Prior for effect on Age
+
+# This model would estimate b_M_D and b_M_A separately
+
+# Define the two submodels with a SHARED parameter name
+bf_divorce_shared <- brms::bf(
+  D_obs ~ b_int_d + b_A * A_obs + b_M_shared * M, # <-- Using b_M_shared
+  nl = TRUE
+)
+
+bf_marriage_age_shared <- brms::bf(
+  A_obs | mi() ~ b_int_a + b_M_shared * M, # <-- Using b_M_shared
+  nl = TRUE
+)
+
+# Set the priors, now with only one prior for the shared parameter
+priors_shared <-
+  prior(normal(0, 0.2), nlpar = "b_int_d") +
+  prior(normal(0, 0.5), nlpar = "b_A") +
+  prior(normal(0, 0.2), nlpar = "b_int_a") +
+  prior(normal(0, 0.5), nlpar = "b_M_shared") # <-- SINGLE prior for the shared effect
+
+# Fit the model
+fit_shared_parameter <- brm(
+  bf_divorce_shared + bf_marriage_age_shared,
+  data = d,
+  prior = priors_shared,
+  chains = 4, cores = 4, seed = 123
+)
 
 

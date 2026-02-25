@@ -1,0 +1,44 @@
+2025-09-29
+TODO:
+1. update plots
+  A. Forest Plot with priors DONE
+  B. Effects plot DONE
+  C. interaction plots DONE
+2. update tables 
+  A. check table A1
+  B. update table A2
+  C. update table A3
+3. simulations add to methods and results, plot in appendix.
+  A. DONE
+  
+  
+  
+4. Clean up the posit environment
+    save models and data needed.
+    change to not save workspace...
+
+2025-10-14
+5. New outline for Wednesday!
+    new files are in 6 except 1_data prep.
+    validate the sim model #DONE
+    then run real data.    #DONE
+    fix up DAG.          
+    finish !!!!
+    
+    
+    
+6. finalize plots
+label indexed betas on forest plot OR just keep vector [1] since that was main question with known value
+make tables
+
+
+
+2026-01-12
+1. new stan model simplified  (DONE and compiled)
+2. update simulated data
+3. update sim analysis model
+4. check results
+5. Run on real data
+6. Check results.
+
+

@@ -1,0 +1,53 @@
+---
+title: "Goby Model DAG"
+format: html
+---
+
+Below is the causal diagram for the simplified Goby model. It includes a latent variable `U` as a common cause for environmental drivers and a correlated error term between `Rain` and `Wind`.
+
+```{mermaid}
+%%| fig-width: 8
+%%| fig-cap: "Causal DAG for the Goby abundance model. The latent variable U represents unobserved 'ecosystem health' for each zone."
+
+graph TD
+    %% --- Style Definitions ---
+    classDef latent fill:#f9f9f9,stroke:#aaa,stroke-dasharray:4
+    classDef outcome fill:#d9534f,stroke:#c9302c,color:white
+    classDef predictor fill:#5bc0de,stroke:#46b8da,color:white
+    classDef data fill:#eee,stroke:#ccc
+
+    %% --- Node Definitions ---
+    subgraph "Unobserved"
+        U(U - Ecosystem Health)
+    end
+    
+    subgraph "Environmental Drivers"
+        Rain; Wind; Breach; Temp; DO; SAV
+    end
+
+    subgraph "Outcome"
+        Goby
+    end
+
+    %% --- Causal Paths ---
+    U --> Rain
+    U --> Wind
+    U --> Breach
+    U --> Temp
+    U --> DO
+    
+    Rain --> Breach
+    Breach --> Temp
+    Wind --> Temp
+    Temp --> DO
+    DO --> Goby
+    SAV --> Goby
+
+    %% Correlated Error for weather variables
+    Rain <--> Wind
+
+    %% --- Apply Styles ---
+    class U latent
+    class Goby outcome
+    class Rain,Wind,Breach,Temp,DO,SAV predictor
+```

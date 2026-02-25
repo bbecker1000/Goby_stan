@@ -1,0 +1,66 @@
+
+{
+  "stan_major_version" : "2",
+  "stan_minor_version" : "36",
+  "stan_patch_version" : "0",
+  "model_name" : "model_12f83afda8b4951c51ce701039e3f278_model",
+  "start_datetime" : "2025-10-16 17:56:38 UTC",
+  "method" : {
+    "value" : "sample",
+    "sample" : {
+      "num_samples" : 1000,
+      "num_warmup" : 3000,
+      "save_warmup" : false,
+      "thin" : 1,
+      "adapt" : {
+        "engaged" : true,
+        "gamma" : 0.05,
+        "delta" : 0.91,
+        "kappa" : 0.75,
+        "t0" : 10,
+        "init_buffer" : 75,
+        "term_buffer" : 50,
+        "window" : 25,
+        "save_metric" : true
+      },
+      "algorithm" : {
+        "value" : "hmc",
+        "hmc" : {
+          "engine" : {
+            "value" : "nuts",
+            "nuts" : {
+              "max_depth" : 10
+            }
+          },
+          "metric" : {
+            "value" : "diag_e"
+          },
+          "metric_file" : "",
+          "stepsize" : 1,
+          "stepsize_jitter" : 0
+        }
+      },
+      "num_chains" : 1
+    }
+  },
+  "id" : 1,
+  "data" : {
+    "file" : "\/tmp\/RtmpcfYIIe\/standata-18d399df20e.json"
+  },
+  "init" : "2",
+  "random" : {
+    "seed" : 123
+  },
+  "output" : {
+    "file" : "\/cloud\/project\/stan_output\/model_12f83afda8b4951c51ce701039e3f278-202510161756-1-8e9f2c.csv",
+    "diagnostic_file" : "",
+    "refresh" : 100,
+    "sig_figs" : -1,
+    "profile_file" : "\/cloud\/project\/stan_output\/model_12f83afda8b4951c51ce701039e3f278-profile-202510161756-1-7ff042.csv",
+    "save_cmdstan_config" : true
+  },
+  "num_threads" : 1,
+  "mpi_enabled" : false,
+  "stanc_version" : "stanc3 v2.36.0",
+  "stancflags" : "--name=model_12f83afda8b4951c51ce701039e3f278_model"
+}

@@ -165,7 +165,7 @@ dat$Goby_lag <- ifelse(dat$Year_int == 1 | dat$Year_int == 10, year_1_lag, dat$G
 dat$Goby_lag <- scale(dat$Goby_lag)
 
 #remove the survey level density
-dat <- dat |> select(-GobyDens)
+dat <- dat |> dplyr::select(-GobyDens)
 
 dat$Goby_lag <- as.numeric(dat$Goby_lag)
 
@@ -287,13 +287,20 @@ summary(dat$Area)
 sd(dat$Area)
 dat$Zone
 
+#modeling SC and SB and binomial
 
-dat |>
-  ggplot(aes(x = SC_count/Area, y = Goby/Area)) +
-  geom_point() +
-  geom_smooth()
+names(dat)
+hist(dat$SC_count, n = 100)
+dat$SC_count <- ifelse(dat$SC_count == 0, 0, 1)
+hist(dat$SC_count)
+
+hist(dat$SB_count, n = 100)
+dat$SB_count <- ifelse(dat$SB_count == 0, 0, 1)
+hist(dat$SB_count)
 
 
+mean(dat$Goby)
+sd(dat$Goby)
 
 
 
